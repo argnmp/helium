@@ -1,0 +1,20 @@
+target:
+  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/2. Areas/ps
+  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/4. Archives/blog
+  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/3. Resources/cpp
+  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/3. Resources/os
+  
+
+base:
+  /Users/tyler/workspace/projects/argnmp.github.io
+  # ./post
+
+static:
+  ./css/static
+
+resource:
+  element:
+    ./css/src/element.html
+  layout: 
+    ./css/src/layout.html  
+  
