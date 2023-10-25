@@ -10,11 +10,11 @@ base:
   # ./post
 
 static:
-  ./css/static
+  ./template/static
 
 resource:
   element:
-    ./css/src/element.html
+    ./template/src/element.html
   layout: 
-    ./css/src/layout.html  
+    ./template/src/layout.html  
   

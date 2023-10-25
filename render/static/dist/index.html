@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="en"><head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/main.css" rel="stylesheet">
+  
+<link rel="preload" href="/render-367a0df9034f98f9_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
+<link rel="modulepreload" href="/render-367a0df9034f98f9.js"></head>
+  <body>
+    <div class="lg:container md:mx-0 md:w-full lg:mx-auto py-10 px-10 box-border h-screen w-screen">
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-5 h-full w-full">
+        <div class="md:col-span-4 lg:col-span-3">
+          <div class="flex flex-col p-5 bg-blue-500 rounded-lg shadow-xl">
+            <div class="w-full object-center">
+              <img class="w-full max-w-sm mx-auto" src="https://avatars.githubusercontent.com/u/145034257?v=4">
+            </div>
+            <p class="text-xl mt-3 text-white">김태현</p>
+            <p class="text-sm text-white">안녕하세요, 김태현의 블로그 입니다.</p>
+            <a class="text-xs text-gray-200" href="https://github.com/argnmp">github</a>
+          </div>
+
+        </div>
+        <div class="md:col-span-8 md:p-5 lg:col-span-9 rounded-lg">
+          <div>
+            [[list]]
+          </div>
+          <div class="markdown-body">
+            [[post]]
+          </div>
+        </div>
+      </div> 
+    </div>
+  
+
+
+<script type="module">import init from '/render-367a0df9034f98f9.js';init('/render-367a0df9034f98f9_bg.wasm');</script><script>(function () {
+    var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var url = protocol + '//' + window.location.host + '/_trunk/ws';
+    var poll_interval = 5000;
+    var reload_upon_connect = () => {
+        window.setTimeout(
+            () => {
+                // when we successfully reconnect, we'll force a
+                // reload (since we presumably lost connection to
+                // trunk due to it being killed, so it will have
+                // rebuilt on restart)
+                var ws = new WebSocket(url);
+                ws.onopen = () => window.location.reload();
+                ws.onclose = reload_upon_connect;
+            },
+            poll_interval);
+    };
+
+    var ws = new WebSocket(url);
+    ws.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.reload) {
+            window.location.reload();
+        }
+    };
+    ws.onclose = reload_upon_connect;
+})()
+</script></body></html>
