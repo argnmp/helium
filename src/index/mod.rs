@@ -3,7 +3,7 @@ use std::{path::PathBuf, collections::VecDeque, error::Error, rc::Rc, cell::RefC
 use tokio::fs::{create_dir_all, read_dir};
 use tokio_stream::{wrappers::ReadDirStream, StreamExt};
 
-use crate::CONTEXT;
+use crate::{CONTEXT, convert::Document};
 
 #[derive(Debug)]
 pub struct Node {
@@ -22,26 +22,48 @@ impl Node {
 }
 
 #[derive(Debug, Clone)]
-pub enum NodeProperty{
-    Dir(PathBuf, PathBuf, PathBuf),
-    File(PathBuf, PathBuf, PathBuf),
+pub struct NodeProperty {
+    pub node_type: NodeType,
+    pub source: PathBuf,
+    pub target: PathBuf,
+    pub rel: PathBuf,
+    pub document: Option<Document>,
 }
 impl NodeProperty {
-    fn path(cursor: PathBuf, target: PathBuf, mut relative: PathBuf) -> Self {
-        match cursor.is_dir() {
+    pub async fn new(source: PathBuf, target: PathBuf, mut rel: PathBuf) -> Result<Self, Box<dyn Error + Send + Sync>> {
+        match source.is_dir() {
             true => {
-                NodeProperty::Dir(cursor, target, relative) 
+                
+                Ok(NodeProperty {
+                    node_type: NodeType::Dir,
+                    source,
+                    target,
+                    rel,
+                    document: None,
+                })
             },
             false => {
                 let filename_ref = target.file_stem().unwrap().to_str().unwrap();
                 let filename = String::from(filename_ref); 
-                relative.pop();
-                relative.push(format!("{}.html",filename));
-                NodeProperty::File(cursor, target, relative) 
+                rel.pop();
+                rel.push(format!("{}.html",filename));
+                Ok(NodeProperty {
+                    node_type: NodeType::File,
+                    source: source.clone(),
+                    target,
+                    rel,
+                    document: Some(Document::new(source).await?),
+                }) 
             }
             
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub enum NodeType{
+    Dir,
+    File,
 }
 
 pub async fn read_path_tree(path: PathBuf) -> Result<Rc<RefCell<Node>>, Box<dyn Error + Send + Sync>> {
@@ -54,14 +76,14 @@ pub async fn read_path_tree(path: PathBuf) -> Result<Rc<RefCell<Node>>, Box<dyn 
     let head = match &path.is_dir() {
         true => {
             Node {
-                property: NodeProperty::Dir(path, target_path, relative_path),
+                property: NodeProperty::new(path, target_path, relative_path).await?,
                 parent: None,
                 children: Vec::new(),
             }
         },
         false => {
             Node {
-                property: NodeProperty::File(path, target_path, relative_path),
+                property: NodeProperty::new(path, target_path, relative_path).await?,
                 parent: None,
                 children: Vec::new(),
             }
@@ -73,19 +95,19 @@ pub async fn read_path_tree(path: PathBuf) -> Result<Rc<RefCell<Node>>, Box<dyn 
     q.push_back(head.clone());
     while let Some(node) = q.pop_front() {
         let mut n = node.borrow_mut();
-        let p = n.property.clone();
-        match p {
-            NodeProperty::Dir(cursor, target, relative) => {
+        let NodeProperty { node_type, source, target, rel, ..} = n.property.clone();
+        match node_type {
+            NodeType::Dir => {
                 create_dir_all(&target).await?;
-                let mut stream = ReadDirStream::new(read_dir(&cursor).await?);
+                let mut stream = ReadDirStream::new(read_dir(&source).await?);
                 while let Some(entry) = stream.next().await {
                     let entry = entry?;
                     let mut tp = target.clone();
                     tp.push(entry.file_name());
-                    let mut tr = relative.clone();
+                    let mut tr = rel.clone();
                     tr.push(entry.file_name());
                     let new_node = Node {
-                        property: NodeProperty::path(entry.path(), tp, tr), 
+                        property: NodeProperty::new(entry.path(), tp, tr).await?, 
                         parent: Some(node.clone()),
                         children: Vec::new(),
                     };
@@ -94,7 +116,7 @@ pub async fn read_path_tree(path: PathBuf) -> Result<Rc<RefCell<Node>>, Box<dyn 
                     q.push_back(new_node);
                 } 
             },
-            NodeProperty::File(_, _, _) => {
+            NodeType::File => {
 
             }
         }
@@ -110,13 +132,14 @@ pub fn collect_file_node_recursive(node: Rc<RefCell<Node>>) -> Result<Vec<Rc<Ref
     
     while let Some(node) = q.pop_front() {
         let n = node.borrow_mut();
-        match &n.property {
-            NodeProperty::Dir(_, target, _) => {
+        let NodeProperty { node_type, .. } = &n.property;
+        match node_type {
+            NodeType::Dir => {
                 for t in &n.children {
                     q.push_back(t.clone());
                 }
             },
-            NodeProperty::File(_, _, _) => {
+            NodeType::File => {
                 files.push(node.clone());
             }
         }

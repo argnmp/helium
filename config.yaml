@@ -12,6 +12,9 @@ base:
 static:
   ./template/static
 
+template:
+  ./template/src/*.html
+
 resource:
   element:
     ./template/src/element.html
