@@ -8,11 +8,11 @@
     </head>
     <body class="dark:bg-black">
         <script type="module">
-            import init, {Ground} from '../static/dist/render.js'
+            import init, {Ground, Index} from '/static/dist/render.js'
             async function run(){
                 await init();
                 let g = Ground.new();
-                let res = await g.add(window.location.pathname);
+                await g.add(window.location.pathname);
                 await g.load(window.location.pathname);
                 document.querySelector("html").addEventListener('click', async function(e) {
                     e.preventDefault();
@@ -25,175 +25,107 @@
                         }
                     }
                 }, false);
+                let n = Index.new();
+                await n.load("/static/searchindex");
+                window.searchIndex = n;
+
             }
             run();
         </script>
-        <div id="main" class="lg:container md:mx-0 md:w-full lg:mx-auto py-10 px-10 box-border h-screen w-screen">
 
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 h-full w-full">
+        <div id="main" class="p-5 md:container md:mx-auto md:px-16 lg:px-20 py-5 xl:px-48 box-border h-screen w-screen">
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-2 h-full w-full">
                 <div class="md:col-span-4 lg:col-span-3">
                     <a href="/">
-                        <div class="flex flex-col mb-2 px-5 py-3 hover:bg-blue-700 hover:dark:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900 border-l-4 border-blue-700 dark:border-blue-400 transition-all duration-500 ease-in-out">
-                            <p class="text-left">blog.argnmp</p>
+                        <div class="flex flex-col mb-2 text-blue-700 hover:text-gray-900 dark:text-blue-400 dark:hover:text-gray-200 transition-all duration-500 ease-in-out border-b border-blue-700 dark:border-blue-400">
+                            <p class="text-left text-4xl font-bold">blog.argnmp</p>
                         </div>
                     </a>
-                    <div class="flex flex-col p-5 bg-blue-700 dark:bg-blue-400 shadow-xl text-gray-200 dark:text-gray-900">
-                        <div class="w-full object-center">
+                    <div class="flex md:flex-col p-4 bg-blue-700 dark:bg-blue-400 shadow-md text-gray-200 dark:text-gray-900">
+                        <div class="w-full md:object-center basis-1/4">
                             <img class="w-full max-w-sm mx-auto" src="https://avatars.githubusercontent.com/u/145034257?v=4" />
                         </div>
-                        <p class="text-xl mt-3">김태현</p>
-                        <p class="text-sm">컴퓨터공학 관련 주제를 주로 다룹니다.</p>
-                        <a class="text-xs" href="https://github.com/argnmp">github</a>
+                        <div class="grow pl-4 md:p-0">
+                            <p class="text-xl md:mt-3">김태현</p>
+                            <p class="text-sm">컴퓨터공학 관련 주제를 주로 다룹니다.</p>
+                            <p class="text-xs"><a class="text-xs" href="https://github.com/argnmp">github</a></p>
+                        </div>
                     </div>
 
                 </div>
-                <div class="md:col-span-8 lg:col-span-9 rounded-lg">
-                    <div>
-                        <div class="mb-2 py-2 px-2 border border-blue-700 dark:border-blue-400 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-                            <p class="text-2xl">
-                            <a class="anc" href="/ps/boj 6087 레이저 통신.html">
-                                boj 6087 레이저 통신
-                            </a>
-                            </p>
-                            <p class="text-xs">
-                                2023-06-10
-                            </p>
-                            <p class="text-xs">
-                                taehyeon kim
-                            </p>
-                        </div>
+                <div class="grid-flow-row md:col-span-8 lg:col-span-9 rounded-lg">
+                    
+<div>
+    <div>
+        <div class="py-2">
+            <form class="flex">
+                <input type="text" name="search" id="search" class="inline w-full rounded-md border-0 py-1 px-4 mr-2 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-blue-600 dark:focus:ring-blue-300 sm:text-sm sm:leading-6 dark:bg-gray-500 dark:text-gray-200">
+                <input type="submit" name="submit" id="submit" class="inline bg-blue-700 hover:bg-white hover:text-blue-700 border border-blue-700 dark:border-blue-400 text-gray-200 dark:bg-blue-400 dark:text-gray-900 hover:dark:bg-gray-500 hover:dark:text-gray-200 rounded-md px-2 text-sm" onClick="console.log(`clicked`)" value="search">
+            </form>
+        </div>
+        <div class="" id="search_result">
+            <a class="" href="">
+                <div class="mb-1 px-2 py-1 border border-gray-200 dark:border-gray-600 dark:text-gray-200 hidden">
+                </div> 
+            </a>
+        </div> 
+    </div>
+    
+    <a class="anc" href="/blog/helloworld.html">
+        <div class="mb-2 py-3 px-5 border-l-4 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+            <p class="text-2xl font-semibold">
+            helloworld
+            </p>
+            <p class="text-xs">
+            안녕하세요, 감사합니다. 
+            </p>
+            <p class="text-xs text-right">
+            undefined
+            </p>
+            <p class="text-xs text-right">
+            undefined
+            </p>
+        </div>
+    </a>
+    
+    <a class="anc" href="/blog/블로그 개설.html">
+        <div class="mb-2 py-3 px-5 border-l-4 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+            <p class="text-2xl font-semibold">
+            블로그 개설
+            </p>
+            <p class="text-xs">
+            github pages 기반의 블로그를 개설했습니다. obsidian으로 작성후, 로컬의 rust로 작성된 프로그램을 통해 배포가 이루어집니다. ![[실습사진.jpeg]] 
+            </p>
+            <p class="text-xs text-right">
+            undefined
+            </p>
+            <p class="text-xs text-right">
+            undefined
+            </p>
+        </div>
+    </a>
+    
+    <a class="anc" href="/blog/priority_queue 1.html">
+        <div class="mb-2 py-3 px-5 border-l-4 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+            <p class="text-2xl font-semibold">
+            priority_queue 1
+            </p>
+            <p class="text-xs">
+            max priority queue priority_queue&lt;int, vector&lt;int&gt;, less&lt;int&gt;&gt; maxq; priority_queue&lt;int&gt; maxq; 두 개 모두 같은 의미이다. less&lt;int&gt; 를 priority_queue에 push 할 때 push 하는 수가 더 작으면 swap을 한다고 이해하면 된다. min priority queue priority_queue&lt;int, vector&lt;int&gt;, greater&lt;int&gt;&gt; minq; 
+            </p>
+            <p class="text-xs text-right">
+            undefined
+            </p>
+            <p class="text-xs text-right">
+            undefined
+            </p>
+        </div>
+    </a>
+    
+</div>
 
-                        <div class="mb-2 py-5 px-2 border border-blue-700 dark:border-blue-400">
-                            <p class="text-2xl text-gray-700 dark:text-gray-400">
-                            <a class="anc" href="/ps/boj 1655 가운데를 말해요.html">
-                                boj 1655 가운데를 말해요
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 11066 파일 합치기.html">
-                                boj 11066 파일 합치기
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 11404 플로이드.html">
-                                boj 11404 플로이드
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 1039 교환.html">
-                                boj 1039 교환
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 10830 행렬 제곱.html">
-                                boj 10830 행렬 제곱
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 1197 최소 스패닝 트리.html">
-                                boj 1197 최소 스패닝 트리
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 2749 피보나치 수 3.html">
-                                boj 2749 피보나치 수 3
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 2931 가스관.html">
-                                boj 2931 가스관
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 11049 행렬 곱셈 순서.html">
-                                boj 11049 행렬 곱셈 순서
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 9370 미확인 도착지.html">
-                                boj 9370 미확인 도착지
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 11657 타임머신.html">
-                                boj 11657 타임머신
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 1916 최소비용 구하기.html">
-                                boj 1916 최소비용 구하기
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 2933 미네랄.html">
-                                boj 2933 미네랄
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 3273 두 수의 합.html">
-                                boj 3273 두 수의 합
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 2211 네트워크 복구.html">
-                                boj 2211 네트워크 복구
-                            </a>
-                            </p>
-                        </div>
-
-                        <div class="py-5 px-2">
-                            <p class="text-2xl dark:text-slate-200">
-                            <a href="/ps/boj 7579 앱.html">
-                                boj 7579 앱
-                            </a>
-                            </p>
-                        </div>
-
-                    </div>
-
-
+                    
                 </div>
             </div> 
         </div>

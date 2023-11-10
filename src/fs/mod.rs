@@ -6,6 +6,7 @@ use tokio_stream::{wrappers::ReadDirStream, StreamExt};
 use crate::{index::{Node, NodeProperty, NodeType}, CONTEXT};
 
 pub async fn create_target_dir<F, Fut>(node: Rc<RefCell<Node>>, node_callback: F) -> Result<(), Box<dyn Error + Send + Sync>> where F: Fn(Rc<RefCell<Node>>) -> Fut, Fut: Future<Output=Result<(), Box<dyn Error + Send + Sync>>>{
+
     let mut q: VecDeque<Rc<RefCell<Node>>> = VecDeque::new();
     q.push_back(node);
     
@@ -21,7 +22,7 @@ pub async fn create_target_dir<F, Fut>(node: Rc<RefCell<Node>>, node_callback: F
                     q.push_back(t.clone());
                 }
             },
-            NodeType::File => {
+            NodeType::File(_) => {
             }
         }
     }
@@ -30,11 +31,9 @@ pub async fn create_target_dir<F, Fut>(node: Rc<RefCell<Node>>, node_callback: F
 }
 
 pub async fn copy_directory(from: PathBuf, to: PathBuf) -> Result<(), Box<dyn Error + Sync + Send>> {
-    let target_path = PathBuf::from(&CONTEXT.config.base).join(to);
-    
     let start_entries = PathBuf::from(from);
     let mut q: VecDeque<(PathBuf, PathBuf)> = VecDeque::new();
-    q.push_back((start_entries, target_path));
+    q.push_back((start_entries, to));
     
     while let Some((cursor, target)) = q.pop_front() {
         match cursor.is_dir() {
