@@ -1,14 +1,14 @@
-use std::{path::{PathBuf, Path}, collections::VecDeque, error::Error, cell::{RefCell, RefMut}, rc::Rc, sync::Arc};
-use convert::{create_index_document, Document, create_search_index, SearchIndex};
+use std::{path::{PathBuf, Path}, collections::{VecDeque, HashMap}, error::Error, cell::{RefCell, RefMut}, rc::Rc, sync::Arc};
+use convert::{create_index_document, Document, SearchIndex};
 use ctx::{Context};
-use fs::{create_target_dir, copy_directory};
-use index::{NodeProperty, collect_file_node_recursive, Node, NodeType, FileType, read_node};
+use fs::{read_filename, read_filename_with_ext};
+use index::{NodeProperty, collect_file_node_recursive, Node, NodeType, FileType, read_node, flatten_node, flatten_file_node};
 use lazy_static::lazy_static;
 
 use clap::Parser;
 use template::Template;
 use tokenizer::Tokenizer;
-use tokio::{fs::File, io::{BufReader, AsyncReadExt, BufWriter, AsyncWriteExt, AsyncBufReadExt}};
+use tokio::{fs::{File, create_dir_all}, io::{BufReader, AsyncReadExt, BufWriter, AsyncWriteExt, AsyncBufReadExt}, sync::{RwLock, Mutex}};
 
 mod ctx;
 mod fs;
@@ -37,7 +37,7 @@ lazy_static! {
         t
     };
     static ref TOKENIZER: Tokenizer = {
-        let tokenizer = Tokenizer::new(1).unwrap();
+        let tokenizer = Tokenizer::new(10).unwrap();
         tokenizer
     };
 }
@@ -45,65 +45,105 @@ lazy_static! {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
 
-    let head = Node::new(NodeProperty::new("".into(), CONTEXT.config.base.clone().into(), "/".into()).await?, None, Vec::new());
+    let head = Node::new(NodeProperty::new(CONTEXT.config.base.clone().into(), CONTEXT.config.base.clone().into(), "/".into()).await?, None, Vec::new());
     for target in &CONTEXT.config.target {
         let node = read_node(target.into()).await?;
-        head.borrow_mut().children.push(node);
+        head.write().await.children.push(node);
     }
-    create_target_dir(head.clone(), create_index_document).await?;
-    let files = collect_file_node_recursive(head.clone())?;
+
+    let mut included_files = HashMap::new();
+    let flatten_file_nodes = flatten_file_node(head.clone()).await?;
+    for node in flatten_file_nodes {
+        let node = node.read().await;
+        let NodeProperty { node_type, target, rel, .. } = &node.property;
+        match node_type {
+            NodeType::File(FileType::Markdown(_)) => {
+                let filename = read_filename(target).await?;
+                let mut rel = rel.clone();
+                rel.pop();
+                rel.push(format!("{}.html",filename));
+                
+                included_files.insert(read_filename(target).await?, rel);
+            },
+            NodeType::File(FileType::Binary) => {
+                included_files.insert(read_filename_with_ext(target).await?, rel.clone());
+            },
+            _ => {}
+        }
+    }
+    let included_files = Arc::new(included_files);
+
+    let search_indices = Arc::new(RwLock::new(Vec::new()));
 
     let mut handles = Vec::new();
+    let flatten_nodes = flatten_node(head.clone()).await?;
+    let before_task_n = flatten_nodes.len();
+    let after_task_n = Arc::new(Mutex::new(0));
+    for node in flatten_nodes.into_iter() {
+        let included_files = included_files.clone();
+        let after_task_n = after_task_n.clone();
+        let search_indices = search_indices.clone();
+        let handle = tokio::spawn(async move {
+            let n = node.read().await;
+            let NodeProperty { node_type, source, target, rel } = &n.property;
+            match node_type {
+                NodeType::Dir => {
+                    create_dir_all(&target).await?;
+                    convert::create_index_document(node.clone()).await?;
+                },
+                NodeType::File(FileType::Markdown(document)) => {
+                    // println!("before extraction for {}", rel.to_str().unwrap());
+                    document.prepare_html(included_files).await?.prepare_token().await?;
+                    println!("after extraction for {}", rel.to_str().unwrap());
+                    let Document { property, raw, html, token, .. } = document;
 
-    for node in files.into_iter() {
-        let NodeProperty { node_type, source, mut target, ..} = node.borrow().property.clone();
-        if let NodeType::File(FileType::Markdown(Document { property, html, .. })) = node_type {
-            let handle = tokio::spawn(async move {
-
-                let f = File::options().read(true).open(source.clone()).await?;             
-                let mut reader = BufReader::new(f);
-                let mut data = String::new();
-                reader.read_to_string(&mut data).await.unwrap();
-
-                let filename_ref = target.file_stem().unwrap().to_str().unwrap();
-                let filename = String::from(filename_ref); 
-                target.pop();
-                target.push(format!("{}.html",filename));
+                    let filename = fs::read_filename(&target).await?;
+                    let mut target = target.clone();
+                    target.pop();
+                    target.push(format!("{}.html", filename));
 
 
-                let mut context = tera::Context::new();
-                context.insert("title", &property.title.unwrap_or("undefined".to_string()));
-                context.insert("alias", &property.alias.unwrap_or("undefined".to_string()));
-                context.insert("author", &property.author.unwrap_or("undefined".to_string()));
-                context.insert("created_at", &property.created_at.unwrap_or("undefined".to_string()));
-                context.insert("tags", &property.tags.unwrap_or(vec![]));
-                context.insert("post", &html);
+                    let property = property.clone();
+                    let mut context = tera::Context::new();
+                    context.insert("title", &property.title.unwrap_or("undefined".to_string()));
+                    context.insert("alias", &property.alias.unwrap_or("undefined".to_string()));
+                    context.insert("author", &property.author.unwrap_or("undefined".to_string()));
+                    context.insert("created_at", &property.created_at.unwrap_or("undefined".to_string()));
+                    context.insert("tags", &property.tags.unwrap_or(vec![]));
+                    context.insert("post", &*html.lock().await);
 
-                let commit = TEMPLATE.tera.render("post.html", &context).unwrap();
-                let f = File::options().write(true).create(true).open(target).await.unwrap();
-                let mut writer = BufWriter::new(f);
-                writer.write(commit.as_bytes()).await.unwrap();
-                writer.flush().await.unwrap();
+                    let commit = TEMPLATE.tera.render("post.html", &context).unwrap();
+                    fs::write_from_string(&target, commit).await?;
 
-                Ok::<(), Box<dyn std::error::Error + Sync + Send>>(())
-            });
-            handles.push(handle);
-            
-        }
+                    let search_index = convert::create_search_index(node.clone()).await?;
+                    search_indices.write().await.push(search_index);
+
+                },
+                NodeType::File(_) => {
+                    fs::copy_recursive(&source, &target).await?; 
+                }
+            }
+            // println!("task ended for {}", rel.to_str().unwrap());
+            *after_task_n.lock().await += 1;
+            Ok::<(), Box<dyn Error + Send + Sync>>(())
+        });
+        handles.push(handle);
     }
     
     for handle in handles {
         let _ = handle.await?;
     }
+    
+    if(before_task_n != *after_task_n.lock().await){
+        panic!("before_task_n and after_task_n does not match");
+    }
 
-    copy_directory(CONTEXT.config.r#static.clone().into(), PathBuf::from(&CONTEXT.config.base).join("static")).await?;
-    let search_indices = create_search_index(head.clone())?;
-    let exports = search_indices.into_iter().map(|index| {index}).collect::<Vec<SearchIndex>>();
-    let binary = bincode::serialize(&exports)?;
+    fs::copy_recursive(&PathBuf::from(&CONTEXT.config.r#static), &PathBuf::from(&CONTEXT.config.base).join("static")).await?;
+    // let search_indices = create_search_index(head.clone())?;
+    // let exports = search_indices.into_iter().map(|index| {index}).collect::<Vec<SearchIndex>>();
+    let search_indices = search_indices.write().await;
+    let binary = bincode::serialize(&*search_indices)?;
+    fs::write_from_slice(&PathBuf::from(&CONTEXT.config.base).join("static/searchindex"), &binary[..]).await?;
 
-    let f = File::options().write(true).create(true).truncate(true).open(PathBuf::from(&CONTEXT.config.base).join("static/searchindex")).await?;
-    let mut writer = BufWriter::new(f);
-    writer.write(&binary[..]).await?;
-    writer.flush().await?;
     Ok(())
 }

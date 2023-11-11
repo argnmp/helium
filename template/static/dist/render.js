@@ -345,11 +345,11 @@ export class Index {
         return takeObject(ret);
     }
     /**
-    * @param {string} token
+    * @param {string} query
     * @returns {Promise<void>}
     */
-    search(token) {
-        const ptr0 = passStringToWasm0(token, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    search(query) {
+        const ptr0 = passStringToWasm0(query, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
         const len0 = WASM_VECTOR_LEN;
         const ret = wasm.index_search(this.__wbg_ptr, ptr0, len0);
         return takeObject(ret);
@@ -681,7 +681,7 @@ function __wbg_get_imports() {
         const ret = wasm.memory;
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_closure_wrapper476 = function(arg0, arg1, arg2) {
+    imports.wbg.__wbindgen_closure_wrapper480 = function(arg0, arg1, arg2) {
         const ret = makeMutClosure(arg0, arg1, 52, __wbg_adapter_24);
         return addHeapObject(ret);
     };

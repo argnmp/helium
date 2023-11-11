@@ -27,6 +27,7 @@
                 }, false);
                 let n = Index.new();
                 await n.load("/static/searchindex");
+                window.n = n;
                 window.search = async function(e) {
                     let text = document.getElementById(`search_input`).value;
                     await n.search(text); 

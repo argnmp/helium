@@ -1,11 +1,11 @@
-use std::{cell::RefCell, error::Error, rc::Rc, path::PathBuf, collections::{VecDeque, HashSet, hash_map::DefaultHasher}, sync::Arc, fmt::Debug};
+use std::{error::Error, path::PathBuf, collections::{VecDeque, HashSet, hash_map::DefaultHasher, HashMap}, sync::Arc, fmt::Debug};
 use markdown::{Options, ParseOptions, mdast::{Text, InlineCode, Code}};
 use serde::{Serialize, Deserialize};
 
-use tokio::{fs::File, io::{BufWriter, AsyncWriteExt, BufReader, AsyncReadExt}};
-use xorf::{HashProxy, Xor8};
+use tokio::{fs::File, io::{BufWriter, AsyncWriteExt, BufReader, AsyncReadExt}, sync::{Mutex, RwLock}};
+use xorf::{HashProxy, Xor16};
 
-use crate::{index::{Node, NodeProperty, NodeType, FileType}, TEMPLATE, TOKENIZER};
+use crate::{index::{Node, NodeProperty, NodeType, FileType}, TEMPLATE, TOKENIZER, fs};
 
 #[derive(Serialize)]
 struct List {
@@ -27,14 +27,14 @@ impl List {
     }
 }
 
-pub async fn create_index_document(node: Rc<RefCell<Node>>) -> Result<(), Box<dyn Error + Send + Sync>> {
-    let node = node.borrow();
+pub async fn create_index_document(node: Arc<RwLock<Node>>) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let node = node.read().await;
     let NodeProperty {node_type, target, .. } = &node.property;
     match node_type {
         NodeType::Dir => {
             let mut list = Vec::new();
             for t in &node.children {
-                let t = t.borrow_mut();
+                let t = t.read().await;
                 let NodeProperty {node_type, rel, ..} = &t.property;
                 
                 match node_type {
@@ -89,12 +89,14 @@ pub struct DocumentProperty {
     pub summarize: Option<String>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct Document {
     pub property: DocumentProperty,
     pub raw: String,
-    pub html: String,
-    pub token: HashSet<String>,
+    pub html: Arc<Mutex<Option<String>>>,
+    pub raw_token: HashSet<String>,
+    pub token: Arc<Mutex<Option<HashSet<String>>>>,
+    pub links: Vec<(usize, usize, DocumentLinkType)>,
 }
 
 impl Document {
@@ -128,29 +130,40 @@ impl Document {
         let mut property: DocumentProperty = serde_yaml::from_str(&property)?;
         property.title = Some(filename);
 
-        let html = markdown::to_html_with_options(&raw, &Options::gfm())?;
-
-        let mut token_before = Vec::new();
+        let mut raw_token = HashSet::new();
         let mut summarize = Vec::new();
         let mut summarize_size = 0;
+        let mut links = Vec::new();
         let mdast = markdown::to_mdast(&raw, &ParseOptions::gfm())?;
         let mut q = VecDeque::<&markdown::mdast::Node>::new();
         q.push_back(&mdast);
         while let Some(node) = q.pop_back() {
             match node {
-                markdown::mdast::Node::Text(Text { value, .. }) => {
+                markdown::mdast::Node::Text(Text { value, position }) => {
                     let values = value.split('\n');
                     for value in values {
-                        // let mut t = value.split(|c: char| !c.is_alphabetic()).filter(|s| !s.is_empty()).map(|s: &str| s.to_string()).collect::<Vec<String>>();
-                        // dbg!(&t);
-                        // token_before.append(&mut t);
-                        token_before.push(value.to_string());
+                        raw_token.insert(value.to_string());
                         if summarize_size < 300 {
                             summarize.push(tera::escape_html(value.trim()));
                             summarize_size += value.len();
                         }
                         else {
                             break;
+                        }
+                    }
+                    match position {
+                        Some(position) => {
+                            let p = position.start.offset;
+                            let res = resolve_document_link(value)?;
+                            let mut l = res.into_iter()
+                                .map(|(start, end, link)|{
+                                    (p + start, p + end, link)
+                                })
+                                .collect::<Vec<(usize, usize, DocumentLinkType)>>();
+                            links.append(&mut l);
+                        },
+                        None => {
+
                         }
                     }
                 },
@@ -186,55 +199,173 @@ impl Document {
         }
         property.summarize = Some(summ);
 
-        let mut token = HashSet::new();
-        for t in &token_before {
-            let res = TOKENIZER.tokenize(&t).await?;
-            res.data.into_iter().for_each(|s|{token.insert(s);});
+        Ok(Document { 
+            property, 
+            raw, 
+            html: Arc::new(Mutex::new(None)), 
+            raw_token,
+            token: Arc::new(Mutex::new(None)),
+            links,
+        })
+    }
+    /* pub async fn resolve_document_link(&self, rels: Arc<HashMap<String, PathBuf>>) -> Result<String, Box<dyn Error + Send + Sync>> {
+        let mut raw_document_link_resolved = (&self.raw).clone();
+        let re = regex::Regex::new(r"\[\[([^\[\]]*)\]\]")?;
+        for captures in re.captures_iter(&self.raw) {
+
+            dbg!(&captures);
+            let pos = captures.get(0).ok_or("no capture index 0")?;
+            let name = captures.get(1).ok_or("no capture index 1")?;
+            let target = rels.get(name.as_str());
+
+            let index = pos.start().checked_sub(1).unwrap_or(pos.start());
+            let prefix = if &self.raw[index..index+1] == "!" {"!"} else {""};
+            match target {
+                Some(path) => {
+                    raw_document_link_resolved.replace_range(pos.start()..pos.end(), &format!("{}[{}]({})", prefix, name.as_str(), path.to_str().ok_or("failed to convert path to str")?));
+                },
+                None => {
+                    raw_document_link_resolved.replace_range(pos.start()..pos.end(), &format!("{}[{}]({})", prefix, name.as_str(), "/"));
+                }
+            }
         }
 
-        Ok(Document { property, raw, html, token })
+        Ok(raw_document_link_resolved)
+    } */
+    pub async fn prepare_html(&self, included_files: Arc<HashMap<String, PathBuf>>) -> Result<&Self, Box<dyn Error + Send + Sync>> {
+        let mut raw = self.raw.clone();
+        let mut weight = 0;
+        for (start, end, link_type) in &self.links {
+            let start = start + weight;
+            let end = end + weight;
+            match link_type {
+                DocumentLinkType::Document(name) => {
+                    match included_files.get(name) {
+                        Some(path) => {
+                            let target = format!("[{}]({})", &name, path.to_str().ok_or("failed to convert path to str")?);
+                            raw.replace_range(start..end, &target);
+                            weight += target.len() - (end - start);
+                        },
+                        None => {
+                            let target = format!("[{}]({})", &name, "/");
+                            raw.replace_range(start..end, &target);
+                            weight += target.len() - (end - start);
+                        },
+                    }  
+                },
+                DocumentLinkType::Binary(name) => {
+                    match included_files.get(name) {
+                        Some(path) => {
+                            let target = format!("![{}]({})", &name, path.to_str().ok_or("failed to convert path to str")?);
+                            raw.replace_range(start..end, &target);
+                            weight += target.len() - (end - start);
+
+                        },
+                        None => {
+                            let target = format!("![{}]({})", &name, "/");
+                            raw.replace_range(start..end, &target);
+                            weight += target.len() - (end - start);
+                        }
+                    }  
+
+                }
+            }
+        }
+        //dbg!(&raw);
+        let html = markdown::to_html_with_options(&raw, &Options::gfm())?;
+        *self.html.lock().await = Some(html);
+        Ok(self)
     }
+    pub async fn prepare_token(&self) -> Result<&Self, Box<dyn Error + Send + Sync>> {
+        let stop_words = stop_words::get(stop_words::LANGUAGE::Korean);
+        let mut token = HashSet::new();
+        for t in &self.raw_token {
+            let whitespace_token = t.split(|c: char| !c.is_alphabetic())
+                .filter(|s| !s.is_empty())
+                .filter(|s| !stop_words.contains(&s.to_string()))
+                .map(|s: &str| s.to_string()).collect::<Vec<String>>();
+
+            token.extend(whitespace_token.into_iter());
+
+            let res = TOKENIZER.tokenize(&t).await?;
+            token.extend(res.data.into_iter().filter(|token|{!stop_words.contains(&token)}));
+        }
+        if let Some(title) = &self.property.title {
+            let title_token = title.split(|c: char| !c.is_alphanumeric())
+                .filter(|s| !s.is_empty())
+                .filter(|s| !stop_words.contains(&s.to_string()))
+                .map(|s: &str| s.to_string()).collect::<Vec<String>>();
+            token.extend(title_token.into_iter());
+            
+            let res = TOKENIZER.tokenize(&title).await?;
+            token.extend(res.data.into_iter().filter(|token|{!stop_words.contains(&token)}));
+        }
+        // dbg!(&token);
+        *self.token.lock().await = Some(token);
+
+        Ok(self)
+    }
+}
+#[derive(Debug, Clone)]
+pub enum DocumentLinkType {
+    Document(String),
+    Binary(String),
+}
+pub fn resolve_document_link(s: &str) -> Result<Vec<(usize, usize, DocumentLinkType)>, Box<dyn Error + Send + Sync>> {
+    let mut res = Vec::new();
+    let re = regex::Regex::new(r"\[\[([^\[\]]*)\]\]")?;
+    for captures in re.captures_iter(s) {
+        //dbg!(&captures);
+        let pos = captures.get(0).ok_or("no capture index 0")?;
+        let name = captures.get(1).ok_or("no capture index 1")?;
+
+        let index = pos.start().checked_sub(1).unwrap_or(pos.start());
+        // let prefix = if &self.raw[index..index+1] == "!" {"!"} else {""};
+        match &s[index..index+1] {
+            "!" => {
+                res.push((pos.start(),pos.end(), DocumentLinkType::Binary(name.as_str().to_owned())));
+            },
+            _ => {
+                res.push((pos.start(),pos.end(), DocumentLinkType::Document(name.as_str().to_owned())));
+            }
+        }
+    }
+    Ok(res)
 }
 
 
 #[derive(Deserialize, Serialize)]
 pub struct SearchIndex {
-    pub filter: HashProxy<String, DefaultHasher, Xor8>,
+    pub filter: HashProxy<String, DefaultHasher, Xor16>,
     pub title: String,
     pub rel: String,
 }
 
-pub fn create_search_index(node: Rc<RefCell<Node>>) -> Result<Vec<SearchIndex>, Box<dyn Error + Send + Sync>> {
-    let node = node.borrow();
-    let NodeProperty { node_type, source, target, rel } = &node.property;
+pub async fn create_search_index(node: Arc<RwLock<Node>>) -> Result<SearchIndex, Box<dyn Error + Send + Sync>> {
+    let node = node.read().await;
+    let NodeProperty { node_type, rel, .. } = &node.property;
     match node_type {
-        NodeType::Dir => {
-            let mut indices = Vec::new();
-            for t in &node.children {
-                let mut index = create_search_index(t.clone())?;
-                indices.append(&mut index);
-            }
-            Ok(indices)
-        },
-        NodeType::File(FileType::Markdown(Document { property, raw, html, token })) => {
+        NodeType::File(FileType::Markdown(Document { property, token, .. })) => {
+            let Some(ref token) = *token.lock().await else { return Err("token is not extracted from raw token".into()); };
+            // dbg!(&token);
             let vec_tokens: Vec<String> = token.iter().map(|t|t.clone()).collect();
             let filter = HashProxy::from(&vec_tokens);
 
-            let filename = rel.file_stem().unwrap().to_str().unwrap();
+            let filename = fs::read_filename(&rel).await?;
             let mut rel = rel.clone();
             rel.pop();
             rel.push(format!("{}.html",filename));
             
-            Ok(vec![
-               SearchIndex {
+            Ok(SearchIndex {
                    filter,
                    title: property.title.clone().ok_or("undefined")?,
                    rel: rel.to_str().ok_or("/")?.to_owned(),
                }
-            ])
+            )
         },
         _ => {
-            Ok(vec![])
+            Err("no document file type".into())
         }
     }
+
 }

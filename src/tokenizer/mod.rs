@@ -7,15 +7,17 @@ static MAIN_PY: &str =
 r#"
 import json
 from kiwipiepy import Kiwi
+from kiwipiepy.utils import Stopwords
 kiwi = Kiwi()
+stopwords = Stopwords()
 
 def main():
     while True:
         try:
             sentence = input()
             result = []
-            for token in kiwi.tokenize(sentence):
-                if token.tag.startswith('NN') or token.tag == 'SL':
+            for token in kiwi.tokenize(sentence, stopwords=stopwords):
+                if token.tag.startswith('NNG') or token.tag == 'SL':
                     result.append(token.form)
             print(json.dumps({
                 "data": result,
@@ -33,7 +35,6 @@ pub struct Token {
 }
 
 pub struct ModuleQueue{
-    signal: Sender<()>,
     ready: VecDeque<Child>,
 }
 pub struct Tokenizer {
@@ -68,10 +69,8 @@ impl Tokenizer {
                 );
         }
 
-        let (tx, _) = tokio::sync::broadcast::channel(1);
-
         Ok(Tokenizer {
-            queues: Arc::new(Mutex::new(ModuleQueue { signal: tx, ready })),
+            queues: Arc::new(Mutex::new(ModuleQueue { ready })),
         })
     }
 
@@ -103,7 +102,6 @@ impl Tokenizer {
 
                     let mut queues = self.queues.lock().await; 
                     queues.ready.push_back(module);
-                    let _ = queues.signal.send(());
                     drop(queues);
 
                     let token: Token = serde_json::from_str(&output)?;
@@ -111,9 +109,7 @@ impl Tokenizer {
                     return Ok(token);
                 },
                 None => {
-                    let mut rx = queues.signal.subscribe();
                     drop(queues);
-                    rx.recv().await?;
                 }
             }
         }

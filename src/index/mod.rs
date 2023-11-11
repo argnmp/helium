@@ -1,6 +1,6 @@
-use std::{path::PathBuf, collections::VecDeque, error::Error, rc::Rc, cell::RefCell, ffi::OsStr};
+use std::{path::PathBuf, collections::VecDeque, error::Error, rc::Rc, cell::RefCell, ffi::OsStr, sync::Arc};
 
-use tokio::fs::{create_dir_all, read_dir};
+use tokio::{fs::{create_dir_all, read_dir}, sync::RwLock};
 use tokio_stream::{wrappers::ReadDirStream, StreamExt};
 
 use crate::{CONTEXT, convert::Document};
@@ -8,12 +8,12 @@ use crate::{CONTEXT, convert::Document};
 #[derive(Debug)]
 pub struct Node {
     pub property: NodeProperty,
-    pub parent: Option<Rc<RefCell<Node>>>,
-    pub children: Vec<Rc<RefCell<Node>>>,
+    pub parent: Option<Arc<RwLock<Node>>>,
+    pub children: Vec<Arc<RwLock<Node>>>,
 }
 impl Node {
-    pub fn new(property: NodeProperty, parent: Option<Rc<RefCell<Node>>>, children: Vec<Rc<RefCell<Node>>>) -> Rc<RefCell<Self>> {
-        Rc::new(RefCell::new(Self {
+    pub fn new(property: NodeProperty, parent: Option<Arc<RwLock<Node>>>, children: Vec<Arc<RwLock<Node>>>) -> Arc<RwLock<Self>> {
+        Arc::new(RwLock::new(Self {
             property,
             parent,
             children
@@ -75,7 +75,7 @@ pub enum FileType{
     Binary
 }
 
-pub async fn read_node(path: PathBuf) -> Result<Rc<RefCell<Node>>, Box<dyn Error + Send + Sync>> {
+pub async fn read_node(path: PathBuf) -> Result<Arc<RwLock<Node>>, Box<dyn Error + Send + Sync>> {
     let mut target_path = PathBuf::from(&CONTEXT.config.base);
     target_path.push(path.file_stem().unwrap());
 
@@ -84,11 +84,11 @@ pub async fn read_node(path: PathBuf) -> Result<Rc<RefCell<Node>>, Box<dyn Error
     
     let head = Node::new(NodeProperty::new(path, target_path, relative_path).await?, None, Vec::new());
 
-    let mut q: VecDeque<Rc<RefCell<Node>>> = VecDeque::new();
+    let mut q: VecDeque<Arc<RwLock<Node>>> = VecDeque::new();
     q.push_back(head.clone());
 
     while let Some(node) = q.pop_front() {
-        let mut n = node.borrow_mut();
+        let mut n = node.write().await;
         let NodeProperty { node_type, source, target, rel, ..} = n.property.clone();
         match node_type {
             NodeType::Dir => {
@@ -116,18 +116,19 @@ pub async fn read_node(path: PathBuf) -> Result<Rc<RefCell<Node>>, Box<dyn Error
     Ok(head)
 }
 
-pub fn flatten_node(node: Rc<RefCell<Node>>) -> Result<Vec<Rc<RefCell<Node>>>, Box<dyn Error + Sync + Send>> {
+pub async fn flatten_node(node: Arc<RwLock<Node>>) -> Result<Vec<Arc<RwLock<Node>>>, Box<dyn Error + Sync + Send>> {
+    // directories are always put in front of documents inside
     let mut nodes = Vec::new();
     let mut queue = VecDeque::new();
     queue.push_back(node);
     while let Some(node) = queue.pop_front() {
         nodes.push(node.clone()); 
-        let node = node.borrow();
+        let node = node.read().await;
         let NodeProperty { node_type, .. } = &node.property;
         match node_type {
             NodeType::Dir => {
                 for next_node in &node.children {
-                    nodes.push(next_node.clone());
+                    queue.push_back(next_node.clone());
                 }
             },
             NodeType::File(_) => {}
@@ -135,14 +136,36 @@ pub fn flatten_node(node: Rc<RefCell<Node>>) -> Result<Vec<Rc<RefCell<Node>>>, B
     }
     Ok(nodes)
 }
+pub async fn flatten_file_node(node: Arc<RwLock<Node>>) -> Result<Vec<Arc<RwLock<Node>>>, Box<dyn Error + Sync + Send>> {
+    // directories are always put in front of documents inside
+    let mut nodes = Vec::new();
+    let mut queue = VecDeque::new();
+    queue.push_back(node);
+    while let Some(node) = queue.pop_front() {
+        let n = node.read().await;
+        let NodeProperty { node_type, .. } = &n.property;
+        match node_type {
+            NodeType::Dir => {
+                for next_node in &n.children {
+                    queue.push_back(next_node.clone());
+                }
+            },
+            NodeType::File(_) => {
+                nodes.push(node.clone());
+            }
+        }
+    }
+    Ok(nodes)
+}
 
-pub fn collect_file_node_recursive(node: Rc<RefCell<Node>>) -> Result<Vec<Rc<RefCell<Node>>>, Box<dyn Error + Sync + Send>> {
+
+pub async fn collect_file_node_recursive(node: Arc<RwLock<Node>>) -> Result<Vec<Arc<RwLock<Node>>>, Box<dyn Error + Sync + Send>> {
     let mut files = Vec::new(); 
-    let mut q: VecDeque<Rc<RefCell<Node>>> = VecDeque::new();
+    let mut q: VecDeque<Arc<RwLock<Node>>> = VecDeque::new();
     q.push_back(node);
     
     while let Some(node) = q.pop_front() {
-        let n = node.borrow_mut();
+        let n = node.read().await;
         let NodeProperty { node_type, .. } = &n.property;
         match node_type {
             NodeType::Dir => {
@@ -158,13 +181,3 @@ pub fn collect_file_node_recursive(node: Rc<RefCell<Node>>) -> Result<Vec<Rc<Ref
 
     Ok(files)
 }
-
-/* pub fn print_node(node: Rc<RefCell<Node>>) {
-    let node = node.borrow();
-    dbg!(&node.property); 
-    if !node.children.is_empty() {
-        for child in &node.children {
-            print_node(child.clone());
-        } 
-    }
-} */

@@ -6,7 +6,7 @@ use wasm_bindgen_futures::JsFuture;
 use web_sys::{Document, RequestInit, RequestMode, Request, DomParser, Response, HtmlCollection, ReadableStreamDefaultReader};
 use serde::{Deserialize};
 
-use xorf::{HashProxy, Xor8, Filter};
+use xorf::{HashProxy, Xor8, Filter, Xor16};
 
 #[wasm_bindgen]
 pub struct Ground{
@@ -98,12 +98,12 @@ impl Ground{
 }
 
 #[derive(Deserialize)]
-pub struct XorSearchIndex {
-    pub value: HashProxy<String, DefaultHasher, Xor8>,
+pub struct Page {
+    pub value: HashProxy<String, DefaultHasher, Xor16>,
     pub title: String,
     pub rel: String,
 }
-impl XorSearchIndex {
+impl Page {
     pub fn decode(v: Vec<u8>) -> Self {
         bincode::deserialize(&v).unwrap()
     }
@@ -111,7 +111,7 @@ impl XorSearchIndex {
 
 #[wasm_bindgen]
 pub struct Index {
-    pages: Vec<XorSearchIndex>,
+    pages: Vec<Page>,
 }
 
 #[wasm_bindgen]
@@ -140,11 +140,11 @@ impl Index {
         let chunk_array: Uint8Array = chunk_value.dyn_into().unwrap();
         let data = chunk_array.to_vec();
 
-        let pages: Vec<XorSearchIndex> = bincode::deserialize(&data).map_err(|_|"deserialize index failed")?;
+        let pages: Vec<Page> = bincode::deserialize(&data).map_err(|_|"deserialize index failed")?;
         self.pages = pages;
         Ok(())
     }
-    async fn attach(&self, result: Vec<(String, String)>) -> Result<(), JsValue> {
+    async fn attach(&self, result: Vec<(usize, String, String)>) -> Result<(), JsValue> {
         let mut target_links = String::new();
         for index in result {
             let target_link = format!(
@@ -154,7 +154,7 @@ impl Index {
                 {}
                 </div> 
                 </a>
-                ", index.0, index.1);
+                ", index.1, index.2);
             target_links.push_str(&target_link);
         }
         
@@ -174,13 +174,28 @@ impl Index {
         main.replace_with_with_node_1(&target_div)?;
         Ok(())
     }
-    pub async fn search(&mut self, token: String) -> Result<(), JsValue> {
-        let mut result = Vec::new();
+    pub async fn search(&mut self, query: String) -> Result<(), JsValue> {
+        let tokens = query.split(|c: char| !c.is_alphanumeric())
+            .filter(|s| !s.is_empty())
+            .map(|s: &str| s.to_string())
+            .collect::<Vec<String>>();
+
+        let mut result: Vec<(usize, String, String)> = Vec::new();
         for page in &self.pages {
-            if page.value.contains(&token) {
-                result.push((page.rel.to_owned(), page.title.to_owned()));
+            let mut priority: usize = 0;
+            for token in &tokens {
+                if page.value.contains(&token) {
+                    priority += 1;
+                } else {
+                    priority = 0;
+                    break;
+                }
+            }
+            if priority >= 1 {
+                result.push((priority, page.rel.to_owned(), page.title.to_owned()));
             }
         }
+        result.sort_by(|a, b| b.0.cmp(&a.0)); 
         self.attach(result).await?;
         Ok(())
     }
