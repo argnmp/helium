@@ -14,15 +14,17 @@ struct List {
     created_at: String,
     author: String,
     summarize: String,
+    child_node: usize,
 }
 impl List {
-    fn new(link: &str, title: &str, created_at: &str, author: &str, summarize: &str) -> Self {
+    fn new(link: &str, title: &str, created_at: &str, author: &str, summarize: &str, child_node: usize) -> Self {
         List {
             link: link.to_owned(),
             title: title.to_owned(), 
             created_at: created_at.to_owned(),
             author: author.to_owned(),
             summarize: summarize.to_owned(),
+            child_node,
         }
     }
 }
@@ -30,11 +32,19 @@ impl List {
 pub async fn create_index_document(node: Arc<RwLock<Node>>) -> Result<(), Box<dyn Error + Send + Sync>> {
     let node = node.read().await;
     let NodeProperty {node_type, target, .. } = &node.property;
+    let mut children = Vec::new();
+    for node in &node.children {
+        children.push(node.read().await);
+    }
+    children.sort_by(|a,b|{
+        b.property.created.cmp(&a.property.created)  
+    });
+    
     match node_type {
         NodeType::Dir => {
             let mut list = Vec::new();
-            for t in &node.children {
-                let t = t.read().await;
+            for t in children {
+                // let t = t.read().await;
                 let NodeProperty {node_type, rel, ..} = &t.property;
                 
                 match node_type {
@@ -42,7 +52,7 @@ pub async fn create_index_document(node: Arc<RwLock<Node>>) -> Result<(), Box<dy
                         let mut rel2 = rel.clone();
                         rel2.pop();
                         rel2.push(format!("{}/index.html",rel.file_stem().unwrap().to_str().unwrap()));
-                        list.push(List::new(rel2.to_str().unwrap(), rel.file_stem().unwrap().to_str().unwrap(), "", "", ""));
+                        list.push(List::new(rel2.to_str().unwrap(), rel.file_stem().unwrap().to_str().unwrap(), "", "", "", t.children.len()));
                     },
                     NodeType::File(FileType::Markdown(document)) => {
                         let Document { property, ..} = document;
@@ -54,7 +64,8 @@ pub async fn create_index_document(node: Arc<RwLock<Node>>) -> Result<(), Box<dy
                                 rel2.file_stem().unwrap().to_str().unwrap(), 
                                 &property.created_at.clone().unwrap_or("undefined".to_owned()),
                                 &property.author.clone().unwrap_or("undefined".to_owned()),
-                                &property.summarize.clone().unwrap_or("undefined".to_owned())
+                                &property.summarize.clone().unwrap_or("undefined".to_owned()),
+                                t.children.len()
                                 ));
                     },
                     _ => {}
@@ -242,7 +253,7 @@ impl Document {
                 DocumentLinkType::Document(name) => {
                     match included_files.get(name) {
                         Some(path) => {
-                            let target = format!("[{}]({})", &name, path.to_str().ok_or("failed to convert path to str")?);
+                            let target = format!("[{}]({})", &name, path.to_str().ok_or("failed to convert path to str")?.replace(" ", "%20"));
                             raw.replace_range(start..end, &target);
                             weight += target.len() - (end - start);
                         },
@@ -256,7 +267,7 @@ impl Document {
                 DocumentLinkType::Binary(name) => {
                     match included_files.get(name) {
                         Some(path) => {
-                            let target = format!("![{}]({})", &name, path.to_str().ok_or("failed to convert path to str")?);
+                            let target = format!("![{}]({})", &name, path.to_str().ok_or("failed to convert path to str")?.replace(" ", "%20"));
                             raw.replace_range(start..end, &target);
                             weight += target.len() - (end - start);
 
@@ -271,7 +282,7 @@ impl Document {
                 }
             }
         }
-        //dbg!(&raw);
+        // dbg!(&raw);
         let html = markdown::to_html_with_options(&raw, &Options::gfm())?;
         *self.html.lock().await = Some(html);
         Ok(self)
@@ -323,7 +334,7 @@ pub fn resolve_document_link(s: &str) -> Result<Vec<(usize, usize, DocumentLinkT
         // let prefix = if &self.raw[index..index+1] == "!" {"!"} else {""};
         match &s[index..index+1] {
             "!" => {
-                res.push((pos.start(),pos.end(), DocumentLinkType::Binary(name.as_str().to_owned())));
+                res.push((index,pos.end(), DocumentLinkType::Binary(name.as_str().to_owned())));
             },
             _ => {
                 res.push((pos.start(),pos.end(), DocumentLinkType::Document(name.as_str().to_owned())));

@@ -2,7 +2,7 @@ use std::{path::{PathBuf, Path}, collections::{VecDeque, HashMap}, error::Error,
 use convert::{create_index_document, Document, SearchIndex};
 use ctx::{Context};
 use fs::{read_filename, read_filename_with_ext};
-use index::{NodeProperty, collect_file_node_recursive, Node, NodeType, FileType, read_node, flatten_node, flatten_file_node};
+use index::{NodeProperty, collect_file_node_recursive, Node, NodeType, FileType, read_node, flatten_node, flatten_file_node, flatten_dir_node};
 use lazy_static::lazy_static;
 
 use clap::Parser;
@@ -50,7 +50,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
         let node = read_node(target.into()).await?;
         head.write().await.children.push(node);
     }
+    let flatten_dir_nodes = flatten_dir_node(head.clone()).await?;
+    for node in flatten_dir_nodes {
+        let node = node.write().await;
+        if node.children.len() > 10 {
+             
+        }
+    }
 
+    /*
+     * collect links
+     */
     let mut included_files = HashMap::new();
     let flatten_file_nodes = flatten_file_node(head.clone()).await?;
     for node in flatten_file_nodes {
@@ -71,10 +81,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
             _ => {}
         }
     }
+
+    /*
+     * start rendering website
+     */
     let included_files = Arc::new(included_files);
-
     let search_indices = Arc::new(RwLock::new(Vec::new()));
-
     let mut handles = Vec::new();
     let flatten_nodes = flatten_node(head.clone()).await?;
     let before_task_n = flatten_nodes.len();
@@ -85,16 +97,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
         let search_indices = search_indices.clone();
         let handle = tokio::spawn(async move {
             let n = node.read().await;
-            let NodeProperty { node_type, source, target, rel } = &n.property;
+            let NodeProperty { node_type, source, target, rel, .. } = &n.property;
             match node_type {
                 NodeType::Dir => {
                     create_dir_all(&target).await?;
                     convert::create_index_document(node.clone()).await?;
                 },
                 NodeType::File(FileType::Markdown(document)) => {
-                    // println!("before extraction for {}", rel.to_str().unwrap());
                     document.prepare_html(included_files).await?.prepare_token().await?;
-                    println!("after extraction for {}", rel.to_str().unwrap());
                     let Document { property, raw, html, token, .. } = document;
 
                     let filename = fs::read_filename(&target).await?;
@@ -123,7 +133,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
                     fs::copy_recursive(&source, &target).await?; 
                 }
             }
-            // println!("task ended for {}", rel.to_str().unwrap());
             *after_task_n.lock().await += 1;
             Ok::<(), Box<dyn Error + Send + Sync>>(())
         });

@@ -1,4 +1,4 @@
-use std::{path::PathBuf, collections::VecDeque, error::Error, rc::Rc, cell::RefCell, ffi::OsStr, sync::Arc};
+use std::{path::PathBuf, collections::VecDeque, error::Error, rc::Rc, cell::RefCell, ffi::OsStr, sync::Arc, time::SystemTime};
 
 use tokio::{fs::{create_dir_all, read_dir}, sync::RwLock};
 use tokio_stream::{wrappers::ReadDirStream, StreamExt};
@@ -27,9 +27,11 @@ pub struct NodeProperty {
     pub source: PathBuf,
     pub target: PathBuf,
     pub rel: PathBuf,
+    pub created: SystemTime,
 }
 impl NodeProperty {
     pub async fn new(source: PathBuf, target: PathBuf, rel: PathBuf) -> Result<Self, Box<dyn Error + Send + Sync>> {
+        let metadata = tokio::fs::metadata(&source).await?;
         match source.is_dir() {
             true => {
                 
@@ -38,6 +40,7 @@ impl NodeProperty {
                     source,
                     target,
                     rel,
+                    created: metadata.created().unwrap_or(SystemTime::now()),
                 })
             },
             false => {
@@ -46,7 +49,7 @@ impl NodeProperty {
                         "md" => {
                             NodeType::File(FileType::Markdown(Document::new(source.clone()).await?))
                         },
-                        "jpeg" | "jpg" => {
+                        "jpeg" | "jpg" | "png" => {
                             NodeType::File(FileType::Binary) 
                         },
                         _ => {
@@ -56,6 +59,7 @@ impl NodeProperty {
                     source,
                     target,
                     rel,
+                    created: metadata.created().unwrap_or(SystemTime::now()),
                 }) 
             }
             
@@ -92,7 +96,6 @@ pub async fn read_node(path: PathBuf) -> Result<Arc<RwLock<Node>>, Box<dyn Error
         let NodeProperty { node_type, source, target, rel, ..} = n.property.clone();
         match node_type {
             NodeType::Dir => {
-                create_dir_all(&target).await?;
                 let mut stream = ReadDirStream::new(read_dir(&source).await?);
                 while let Some(entry) = stream.next().await {
                     let entry = entry?;
@@ -132,6 +135,28 @@ pub async fn flatten_node(node: Arc<RwLock<Node>>) -> Result<Vec<Arc<RwLock<Node
                 }
             },
             NodeType::File(_) => {}
+        }
+    }
+    Ok(nodes)
+}
+pub async fn flatten_dir_node(node: Arc<RwLock<Node>>) -> Result<Vec<Arc<RwLock<Node>>>, Box<dyn Error + Sync + Send>> {
+    // directories are always put in front of documents inside
+    let mut nodes = Vec::new();
+    let mut queue = VecDeque::new();
+    queue.push_back(node);
+    while let Some(node) = queue.pop_front() {
+        let n = node.read().await;
+        let NodeProperty { node_type, .. } = &n.property;
+        match node_type {
+            NodeType::Dir => {
+                for next_node in &n.children {
+                    queue.push_back(next_node.clone());
+                }
+                drop(n);
+                nodes.push(node);
+            },
+            NodeType::File(_) => {
+            }
         }
     }
     Ok(nodes)
