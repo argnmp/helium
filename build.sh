@@ -9,4 +9,5 @@ cd ../
 rm -rf /Users/tyler/workspace/projects/argnmp.github.io/*
 
 pwd
+export CARGO_TARGET_DIR=target2
 cargo run -- --config config.yaml
