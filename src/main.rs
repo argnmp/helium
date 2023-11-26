@@ -2,7 +2,7 @@ use std::{path::{PathBuf, Path}, collections::{VecDeque, HashMap}, error::Error,
 use convert::{create_index_document, Document, SearchIndex};
 use ctx::{Context};
 use fs::{read_filename, read_filename_with_ext};
-use index::{NodeProperty, collect_file_node_recursive, Node, NodeType, FileType, read_node, flatten_node, flatten_file_node, flatten_dir_node};
+use index::{NodeProperty, Node, NodeType, FileType, read_node, flatten_node, flatten_file_node, flatten_dir_node, DirType};
 use lazy_static::lazy_static;
 
 use clap::Parser;
@@ -50,12 +50,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
         let node = read_node(target.into()).await?;
         head.write().await.children.push(node);
     }
+    /*
+     * create directories
+     * this task should be done first to process creating documents in parallel
+     */
     let flatten_dir_nodes = flatten_dir_node(head.clone()).await?;
     for node in flatten_dir_nodes {
-        let node = node.write().await;
-        if node.children.len() > 10 {
-             
-        }
+        let node = &node.read().await;
+        let NodeProperty { target, .. } = &node.property;
+        create_dir_all(target).await?;
     }
 
     /*
@@ -99,9 +102,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
             let n = node.read().await;
             let NodeProperty { node_type, source, target, rel, .. } = &n.property;
             match node_type {
-                NodeType::Dir => {
-                    create_dir_all(&target).await?;
-                    convert::create_index_document(node.clone()).await?;
+                NodeType::Dir(dir_type) => {
+                    match dir_type {
+                        DirType::Default(_, is_paged) if *is_paged => { },
+                        _ => {
+                            convert::create_index_document(node.clone()).await?;
+                        }
+                    }
                 },
                 NodeType::File(FileType::Markdown(document)) => {
                     document.prepare_html(included_files).await?.prepare_token().await?;
@@ -140,7 +147,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
     }
     
     for handle in handles {
-        let _ = handle.await?;
+        let _ = handle.await??;
     }
     
     if(before_task_n != *after_task_n.lock().await){

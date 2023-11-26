@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 use tokio::{fs::File, io::{BufWriter, AsyncWriteExt, BufReader, AsyncReadExt}, sync::{Mutex, RwLock}};
 use xorf::{HashProxy, Xor16};
 
-use crate::{index::{Node, NodeProperty, NodeType, FileType}, TEMPLATE, TOKENIZER, fs};
+use crate::{index::{Node, NodeProperty, NodeType, FileType, DirType}, TEMPLATE, TOKENIZER, fs};
 
 #[derive(Serialize)]
 struct List {
@@ -29,9 +29,16 @@ impl List {
     }
 }
 
+#[derive(Serialize)]
+struct Page {
+    index: usize,
+    cursor: bool,
+    href: String,
+}
+
 pub async fn create_index_document(node: Arc<RwLock<Node>>) -> Result<(), Box<dyn Error + Send + Sync>> {
     let node = node.read().await;
-    let NodeProperty {node_type, target, .. } = &node.property;
+    let NodeProperty {node_type, target, rel, .. } = &node.property;
     let mut children = Vec::new();
     for node in &node.children {
         children.push(node.read().await);
@@ -41,18 +48,22 @@ pub async fn create_index_document(node: Arc<RwLock<Node>>) -> Result<(), Box<dy
     });
     
     match node_type {
-        NodeType::Dir => {
+        NodeType::Dir(dir_type) => {
             let mut list = Vec::new();
             for t in children {
                 // let t = t.read().await;
                 let NodeProperty {node_type, rel, ..} = &t.property;
                 
                 match node_type {
-                    NodeType::Dir => {
+                    NodeType::Dir(DirType::Default(child_node_number, is_paged)) => {
                         let mut rel2 = rel.clone();
                         rel2.pop();
-                        rel2.push(format!("{}/index.html",rel.file_stem().unwrap().to_str().unwrap()));
-                        list.push(List::new(rel2.to_str().unwrap(), rel.file_stem().unwrap().to_str().unwrap(), "", "", "", t.children.len()));
+                        if *is_paged {
+                            rel2.push(format!("{}/1/index.html",rel.file_name().unwrap().to_str().unwrap()));
+                        } else {
+                            rel2.push(format!("{}/index.html",rel.file_name().unwrap().to_str().unwrap()));
+                        }
+                        list.push(List::new(rel2.to_str().unwrap(), rel.file_name().unwrap().to_str().unwrap(), "", "", "", *child_node_number));
                     },
                     NodeType::File(FileType::Markdown(document)) => {
                         let Document { property, ..} = document;
@@ -72,11 +83,24 @@ pub async fn create_index_document(node: Arc<RwLock<Node>>) -> Result<(), Box<dy
                 }
             }
 
+
             let mut target = target.clone();
             target.push("index.html");
             
             let mut context = tera::Context::new();
             context.insert("list", &list);
+            
+            let mut page_indices = Vec::new();
+            if let DirType::Page(index, total) = dir_type {
+                for i in 1..total+1 {
+                    let mut rel = rel.clone();
+                    rel.pop();
+                    rel.push(&i.to_string());
+                    page_indices.push(Page { index: i, cursor: i == *index, href: rel.to_str().ok_or("cannot convert path to str")?.to_owned()});
+                }
+            }
+            context.insert("pages", &page_indices);
+
             let commit = TEMPLATE.tera.render("list.html", &context)?;
             let f = File::options().write(true).create(true).open(target).await?;
             let mut writer = BufWriter::new(f);

@@ -1,4 +1,4 @@
-use std::{path::PathBuf, collections::VecDeque, error::Error, rc::Rc, cell::RefCell, ffi::OsStr, sync::Arc, time::SystemTime};
+use std::{path::PathBuf, collections::VecDeque, error::Error, rc::Rc, cell::RefCell, ffi::OsStr, sync::Arc, time::SystemTime, borrow::BorrowMut};
 
 use tokio::{fs::{create_dir_all, read_dir}, sync::RwLock};
 use tokio_stream::{wrappers::ReadDirStream, StreamExt};
@@ -36,7 +36,7 @@ impl NodeProperty {
             true => {
                 
                 Ok(NodeProperty {
-                    node_type: NodeType::Dir,
+                    node_type: NodeType::Dir(DirType::Default(0, false)),
                     source,
                     target,
                     rel,
@@ -69,8 +69,13 @@ impl NodeProperty {
 
 #[derive(Debug, Clone)]
 pub enum NodeType{
-    Dir,
+    Dir(DirType),
     File(FileType),
+}
+#[derive(Debug, Clone)]
+pub enum DirType{
+    Default(usize, bool), // (number of child node, is_paged)
+    Page(usize, usize) // (index, total)
 }
 
 #[derive(Debug, Clone)]
@@ -93,13 +98,80 @@ pub async fn read_node(path: PathBuf) -> Result<Arc<RwLock<Node>>, Box<dyn Error
 
     while let Some(node) = q.pop_front() {
         let mut n = node.write().await;
-        let NodeProperty { node_type, source, target, rel, ..} = n.property.clone();
+        let NodeProperty { node_type, source, target, rel, created} = n.property.clone();
         match node_type {
-            NodeType::Dir => {
+            NodeType::Dir(DirType::Default(_, _)) => {
                 let mut stream = ReadDirStream::new(read_dir(&source).await?);
+                let mut document_entries = Vec::new();
+                let mut other_entries = Vec::new();
                 while let Some(entry) = stream.next().await {
                     let entry = entry?;
-                    
+                    let path = entry.path();
+                    let metadata = tokio::fs::metadata(&path).await?; 
+                    match path.is_dir() {
+                        true => {
+                            document_entries.push((metadata.created()?, entry));
+                        },
+                        false => {
+                            let ext = path.extension().ok_or("extension error")?.to_str().ok_or("no str in osstr")?;
+                            match ext {
+                                "md" => { document_entries.push((metadata.created()?, entry)); },
+                                _ => {other_entries.push(entry);},
+                            }
+                        }
+                    }
+                }
+                // sort document entries to created at desc;
+                document_entries.sort_by(|a,b|{
+                    b.0.cmp(&a.0)  
+                });
+                let document_entries = document_entries.into_iter().map(|e|e.1).collect::<Vec<_>>();
+                if document_entries.len() > 10 {
+                    let total = document_entries.len() / 10 + if document_entries.len() % 10 > 0 { 1 } else { 0 };
+                    for (idx, page) in document_entries.chunks(10).enumerate() {
+                        let idx = idx + 1;
+                        let mut target = target.clone();
+                        target.push(&idx.to_string());
+                        let mut rel = rel.clone();
+                        rel.push(&idx.to_string());
+                        let page_node = Node::new(
+                            NodeProperty { 
+                                node_type: NodeType::Dir(DirType::Page(idx, total)), 
+                                source: source.clone(),
+                                target: target.clone(), 
+                                rel: rel.clone(),
+                                created: created.clone(),
+                            },
+                            Some(node.clone()),
+                            Vec::new(),
+                        );
+                        for entry in page {
+                            let mut target = target.clone();
+                            target.push(entry.file_name());
+                            let mut rel = rel.clone();
+                            rel.push(entry.file_name());
+                            let new_node = Node::new(NodeProperty::new(entry.path(), target, rel).await?, Some(page_node.clone()), Vec::new());
+                            let mut page_node = page_node.write().await;
+                            page_node.children.push(new_node.clone());
+                            q.push_back(new_node);
+                        }
+                        n.children.push(page_node);
+                    }
+                    n.property.node_type = NodeType::Dir(DirType::Default(document_entries.len(), true));
+                } else {
+                    for entry in &document_entries {
+                        let mut tp = target.clone();
+                        tp.push(entry.file_name());
+                        let mut tr = rel.clone();
+                        tr.push(entry.file_name());
+
+                        let new_node = Node::new(NodeProperty::new(entry.path(), tp, tr).await?, Some(node.clone()), Vec::new());
+                        n.children.push(new_node.clone());
+                        q.push_back(new_node);
+                    }
+                    n.property.node_type = NodeType::Dir(DirType::Default(document_entries.len(), false));
+                }
+                for entry in other_entries {
                     let mut tp = target.clone();
                     tp.push(entry.file_name());
                     let mut tr = rel.clone();
@@ -108,11 +180,9 @@ pub async fn read_node(path: PathBuf) -> Result<Arc<RwLock<Node>>, Box<dyn Error
                     let new_node = Node::new(NodeProperty::new(entry.path(), tp, tr).await?, Some(node.clone()), Vec::new());
                     n.children.push(new_node.clone());
                     q.push_back(new_node);
-                } 
+                }
             },
-            NodeType::File(_) => {
-
-            }
+            _ => {}
         }
     }
 
@@ -129,7 +199,7 @@ pub async fn flatten_node(node: Arc<RwLock<Node>>) -> Result<Vec<Arc<RwLock<Node
         let node = node.read().await;
         let NodeProperty { node_type, .. } = &node.property;
         match node_type {
-            NodeType::Dir => {
+            NodeType::Dir(_) => {
                 for next_node in &node.children {
                     queue.push_back(next_node.clone());
                 }
@@ -148,7 +218,7 @@ pub async fn flatten_dir_node(node: Arc<RwLock<Node>>) -> Result<Vec<Arc<RwLock<
         let n = node.read().await;
         let NodeProperty { node_type, .. } = &n.property;
         match node_type {
-            NodeType::Dir => {
+            NodeType::Dir(_) => {
                 for next_node in &n.children {
                     queue.push_back(next_node.clone());
                 }
@@ -170,7 +240,7 @@ pub async fn flatten_file_node(node: Arc<RwLock<Node>>) -> Result<Vec<Arc<RwLock
         let n = node.read().await;
         let NodeProperty { node_type, .. } = &n.property;
         match node_type {
-            NodeType::Dir => {
+            NodeType::Dir(_) => {
                 for next_node in &n.children {
                     queue.push_back(next_node.clone());
                 }
@@ -181,28 +251,4 @@ pub async fn flatten_file_node(node: Arc<RwLock<Node>>) -> Result<Vec<Arc<RwLock
         }
     }
     Ok(nodes)
-}
-
-
-pub async fn collect_file_node_recursive(node: Arc<RwLock<Node>>) -> Result<Vec<Arc<RwLock<Node>>>, Box<dyn Error + Sync + Send>> {
-    let mut files = Vec::new(); 
-    let mut q: VecDeque<Arc<RwLock<Node>>> = VecDeque::new();
-    q.push_back(node);
-    
-    while let Some(node) = q.pop_front() {
-        let n = node.read().await;
-        let NodeProperty { node_type, .. } = &n.property;
-        match node_type {
-            NodeType::Dir => {
-                for t in &n.children {
-                    q.push_back(t.clone());
-                }
-            },
-            NodeType::File(_) => {
-                files.push(node.clone());
-            }
-        }
-    }
-
-    Ok(files)
 }

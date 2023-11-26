@@ -24,5 +24,23 @@
         </div>
     </a>
     {% endfor %}
+    <div class="my-3">
+        <div class="flex mx-auto w-min bg-gray-100 dark:bg-gray-700 font-semibold">
+            {% for page in pages%}
+                <!-- <a class="anc w-8 h-8" href="{{page.href}}"> -->
+                {% if page.cursor == true %}
+                <a class="anc inline w-8 h-8 bg-blue-700 dark:bg-blue-400 text-gray-200 dark:text-gray-900" href="{{page.href}}">
+                    <p class="leading-8 text-center cursor-pointer">{{page.index}}</p>
+                </a>
+                {% else %}
+                <a class="anc inline w-8 h-8 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900" href="{{page.href}}">
+                    <p class="leading-8 text-center cursor-pointer">{{page.index}}</p>
+                </a>
+                {% endif %}
+                <!-- </a> -->
+            {% endfor %}
+        </div>
+    </div>
+    
 </div>
 {% endblock listblock%}
