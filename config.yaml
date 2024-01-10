@@ -1,11 +1,11 @@
 target:
   - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/2. Areas/ps
   - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/4. Archives/blog/daily
-  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/4. Archives/blog/linux
-  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/4. Archives/blog/rust
-  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/4. Archives/blog/node
-  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/3. Resources/cpp
   - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/4. Archives/project
+  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/3. Resources/cpp
+  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/3. Resources/rust
+  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/3. Resources/linux
+  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/3. Resources/node
   
 
 base:

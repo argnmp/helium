@@ -1,5 +1,5 @@
-use std::{path::{PathBuf, Path}, collections::{VecDeque, HashMap}, error::Error, cell::{RefCell, RefMut}, rc::Rc, sync::Arc};
-use convert::{create_index_document, Document, SearchIndex};
+use std::{path::{PathBuf}, collections::{HashMap}, error::Error, sync::Arc};
+use convert::{Document};
 use ctx::{Context};
 use fs::{read_filename, read_filename_with_ext};
 use index::{NodeProperty, Node, NodeType, FileType, read_node, flatten_node, flatten_file_node, flatten_dir_node, DirType};
@@ -8,7 +8,7 @@ use lazy_static::lazy_static;
 use clap::Parser;
 use template::Template;
 use tokenizer::Tokenizer;
-use tokio::{fs::{File, create_dir_all}, io::{BufReader, AsyncReadExt, BufWriter, AsyncWriteExt, AsyncBufReadExt}, sync::{RwLock, Mutex}};
+use tokio::{fs::{create_dir_all}, io::{AsyncReadExt, AsyncWriteExt}, sync::{RwLock, Mutex}};
 
 mod ctx;
 mod fs;
@@ -100,7 +100,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
         let search_indices = search_indices.clone();
         let handle = tokio::spawn(async move {
             let n = node.read().await;
-            let NodeProperty { node_type, source, target, rel, .. } = &n.property;
+            let NodeProperty { node_type, source, target,  .. } = &n.property;
             match node_type {
                 NodeType::Dir(dir_type) => {
                     match dir_type {
@@ -112,7 +112,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
                 },
                 NodeType::File(FileType::Markdown(document)) => {
                     document.prepare_html(included_files).await?.prepare_token().await?;
-                    let Document { property, raw, html, token, .. } = document;
+                    let Document { property,  html,  .. } = document;
 
                     let filename = fs::read_filename(&target).await?;
                     let mut target = target.clone();
@@ -150,7 +150,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
         let _ = handle.await??;
     }
     
-    if(before_task_n != *after_task_n.lock().await){
+    if before_task_n != *after_task_n.lock().await {
         panic!("before_task_n and after_task_n does not match");
     }
 

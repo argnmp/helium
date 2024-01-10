@@ -16,4 +16,5 @@ fn main(){
         .status()
         .unwrap();
     println!("cargo:warning=template build end");
+   
 }

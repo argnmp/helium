@@ -1,6 +1,6 @@
-use std::{path::PathBuf, collections::VecDeque, error::Error, rc::Rc, cell::RefCell, ffi::OsStr, sync::Arc, time::SystemTime, borrow::BorrowMut};
+use std::{path::PathBuf, collections::VecDeque, error::Error, sync::Arc, time::SystemTime};
 
-use tokio::{fs::{create_dir_all, read_dir}, sync::RwLock};
+use tokio::{fs::{read_dir}, sync::RwLock};
 use tokio_stream::{wrappers::ReadDirStream, StreamExt};
 
 use crate::{CONTEXT, convert::Document};

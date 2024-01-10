@@ -50,7 +50,7 @@
                 <div class="md:col-span-3">
                     <div class="flex md:flex-col p-2 text-gray-900 dark:text-gray-200">
                         <div class="w-full md:object-center basis-1/4 p-2">
-                            <img class="w-full max-w-sm mx-auto rounded-full ring-2" src="https://avatars.githubusercontent.com/u/145034257?v=4" />
+                            <img class="w-full max-w-sm mx-auto rounded-full ring-blue-600 dark:ring-blue-500" src="https://avatars.githubusercontent.com/u/145034257?v=4" />
                         </div>
                         <div class="grow pl-4 md:p-0 my-auto">
                             <p class="text-2xl md:mt-3 md:text-center mb-2 font-bold">argnmp</p>
@@ -62,7 +62,7 @@
                     <div>
                         <div class="py-2">
                             <form class="flex md:flex-col">
-                                <input type="text" name="search" id="search_input" class="inline w-full rounded-md border-0 py-1 px-2 mr-2 md:mr-0 md:mb-1 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-blue-600 dark:focus:ring-blue-300 sm:text-sm sm:leading-6 dark:bg-gray-500 dark:text-gray-200" onkeyup="window.search()">
+                                <input type="text" name="search" id="search_input" class="inline w-full rounded-md border-0 py-1 px-2 mr-2 md:mr-0 md:mb-1 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-blue-600 dark:focus:ring-blue-300 sm:text-sm sm:leading-6 dark:bg-gray-800 dark:text-gray-200" onkeyup="window.search()">
                                 <input type="submit" name="submit" id="submit" class="inline bg-blue-700 hover:bg-white hover:text-blue-700 border border-blue-700 dark:border-blue-400 text-gray-200 dark:bg-blue-400 dark:text-gray-900 hover:dark:bg-gray-500 hover:dark:text-gray-200 rounded-md px-2 text-sm cursor-pointer md:w-full" onclick="window.search()" value="search">
                             </form>
                         </div>
@@ -75,162 +75,197 @@
                     </div>
                 </div>
                 <div class="grid-flow-row md:col-span-9 rounded-lg">
+                    
+                     
+<article>
+    <section class="w-full">
+        <div class="mb-2 md:pl-5">
+            <p class="text-4xl md:text-5xl break-keep font-bold text-gray-700 dark:text-gray-300 py-1">baleifjaleifjaliefjaefoj 1019 책 페이지</p>
+        </div>
+        <div class="mb-4 md:pl-5">
+            <table class="text-left text-sm text-gray-700 dark:text-gray-200">
+                <tbody>
+                    <tr class="">
+                        <th scope="row" class="pr-4">
+                            alias
+                        </th>
+                        <td class="">undefined</td>
+                    </tr>
+                    <tr class="">
+                        <th scope="row" class="pr-4">
+                            author
+                        </th>
+                        <td class="">Taehyeon Kim</td>
+                    </tr>
+                    <tr class="">
+                        <th scope="row" class="pr-4">
+                            created at
+                        </th>
+                        <td class="">2023-12-04</td>
+                    </tr>
+                    <tr class="">
+                        <th scope="row" class="pr-4">
+                            tags 
+                        </th>
+                        <td class="">
+                             
+                            <p class="inline">#boj </p>
+                             
+                            <p class="inline">#ps </p>
+                            
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <div class="clear-none markdown-body mb-2 md:pl-5 leading-7 font-post">
+        <h3>문제</h3>
+<p><a href="https://www.acmicpc.net/problem/1019">https://www.acmicpc.net/problem/1019</a></p>
+<h3>코드</h3>
+<pre><code class="language-c++">#include &lt;cmath&gt;
+#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+#include &lt;algorithm&gt;
+#include &lt;climits&gt;
+#include &lt;vector&gt;
+#include &lt;queue&gt;
+#include &lt;map&gt;
+#include &lt;unordered_map&gt;
+#include &lt;set&gt;
+#include &lt;unordered_set&gt;
+#include &lt;bitset&gt;
+#include &lt;cstring&gt;
+using namespace std;
+using ll = long long;
+string sn;
+ll n;
+ll co[10] = {0,};
+void print(){
+    for(int i = 0; i&lt;10; i++){
+        cout &lt;&lt; co[i] &lt;&lt; ' ';
+    }
+    cout &lt;&lt; endl;
+}
+void n_digit_count(int size, bool exclude_high_zero){
+    if(size &lt;= 0) return;
+    ll base_count = pow(10, size-1)*size;
+    for(int i = 1; i&lt;10; i++)
+        co[i] += base_count;
+    if(exclude_high_zero){
+        int tsize = size-1;
+        while(tsize&gt;=0){
+            base_count -= pow(10, tsize);
+            tsize -= 1;
+        }
+    }
+    co[0] += base_count;
+}
+void calc_remainder(string target, bool is_highest){
+    int digit = target[0]-48; 
+    int i = is_highest ? 1 : 0;
+    for(;i&lt;digit; i++){
+        co[i] += pow(10, target.length()-1);
+        n_digit_count(target.length()-1, false);
+    }
+    if(target.length() &gt; 1){
+        string modified = target.erase(0, 1);
+        co[digit] += atoll(modified.c_str()) + 1;
+        calc_remainder(modified, false);
+    }
+    else {
+        co[digit] += 1;
+    }
+}
+void solve(){
+    cin &gt;&gt; sn;
+    n = atoll(sn.c_str());
+    n_digit_count(sn.length()-1, true); 
+    calc_remainder(sn, true);
+    print();
+}
+int main(){
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    solve(); 
+    return 0;
+}
+</code></pre>
+<h3>풀이</h3>
+<p>n이 최대 10억이기 때문에, 직접 숫자를 counting 하는 방식으로는 해결이 불가능하다. 따라서 규칙을 찾아서 해결해야 한다.</p>
+<p>n이 543으로 주어진 경우를 생각해보자.</p>
+<p>먼저 n의 자릿수를 살펴보아야 한다. 5432의 경우는 네 자리이다. 최대 세 자리의 수로 만들수 있는 모든 페이지는 모두 포함되기 때문에, 최대 세 자리로 만들 수 있는 모든 페이지에 속하는 숫자의 개수를 먼저 세어주어야 한다.</p>
+<p>세 자리로 만들 수 있는 모든 수는 <code>000~999</code>이다. 이 수들 중에서 0의 개수는 다음과 같이 셀 수 있다.</p>
+<ul>
+<li>첫째 자리의 숫자가 0일 때 모든 가능한 조합(0xx): 10^2 가지 (다른 두 자리가 각각 10개의 숫자가 들어갈 수 있으므로)</li>
+<li>둘째 자리의 숫자가 0일 때 모든 가능한 조합(x0x): 10^2 가지 (다른 두 자리가 각각 10개의 숫자가 들어갈 수 있으므로)</li>
+<li>셋째 자리의 숫자가 0일 때 모든 가능한 조합(xx0): 10^2 가지 (다른 두 자리가 각각 10개의 숫자가 들어갈 수 있으므로)
+따라서 총 300개의 0이 이 범위에 포함되어 있다. 뿐만 아니라, <code>0~9</code>의 모든 숫자가 각각 300개씩 포함되어 있다.</li>
+</ul>
+<p>하지만 책 페이지의 경우 0, 01, 02, 001 과 같은 페이지는 존재하지 않기 때문에 이러한 경우의 0의 개수를 빼주어야 한다. 그러한 경우의 수는 다음과 같다</p>
+<ul>
+<li>첫째 자리의 숫자가 0일 때 모든 가능한 조합(0xx): 10^2 가지</li>
+<li>첫째, 둘째 자리의 숫자가 0일 때 모든 가능한 조합(00x): 10가지</li>
+<li>첫째, 둘째, 셋째 자리의 숫자가 0일 때 모든 가능한 조합(000): 1가지
+총 111개의 0이 포함되어 있다. 그래서 0의 경우는 300-111 = 189 개의 0이 존재한다.</li>
+</ul>
+<p>결론적으로 최대 세 자리의 페이지에서 나타나는 각 숫자의 개수는 다음과 같다. 주어진 테스트 케이스를 통해 이 개수가 맞다는 것을 확인할 수 있다.</p>
+<ul>
+<li>0: 189개</li>
+<li>1~9: 각 300개</li>
+</ul>
+<p>위의 함수 중 <code>n_digit_count(int size, bool exclude_high_zero)</code>가 이것을 계산한다. size는 자릿수를 의미하고, exclude_high_zero는 앞서 존재하지 않는 페이지에 대한 0의 개수를 빼줄지를 결정한다.</p>
+<p>다음으로는 나머지 페이지에 대해서 숫자의 갯수를 세어야 한다.</p>
+<p>앞서 5432의 경우 1<del>999 페이지 까지에서 등장하는 각 숫자의 개수를 구했다. 따라서 이제는 1000</del>5432 페이지에서 등장하는 각 숫자의 개수를 구해야 한다.</p>
+<pre><code class="language-shell">5432
+1 000~999
+2 000~999
+3 000~999
+4 000~999
+5 000~432
+  0 00~99
+  1 00~99
+  2 00~99
+  3 00~99
+  4 00~32
+    0 0~9
+    1 0~9
+    2 0~9
+    3 0~2
+      0
+      1
+      2
 
-                    <div class="md:pl-5">
+</code></pre>
+<p>앞에서 부터 한 자리씩 해당 숫자와, 이 과정에서 등장하는 다른 자리의 숫자가 등장하는 횟수를 카운팅 하면 된다.
+여기서 중요한 것은 두가지를 함께 카운팅을 하는 것이다.</p>
+<ol>
+<li>현재 보고있는 자리의 숫자의 총 등장 횟수</li>
+<li>1번의 과정에서, 나타나는 하위 자리들에 있는 숫자들의 총 등장 횟수</li>
+</ol>
+<p>첫번째 줄에서는 다음과 같이 카운팅해야 한다. (1xxx)</p>
+<ul>
+<li>xxx에는 (000~999) 까지 가능하기 때문에 1은 총 1000번 등장한다.</li>
+<li>xxx에는 (000~999) 까지 가능하기 때문에, 처음에 먼저 계산하는데 사용한 방식을 따라 다른 자릿수에서 나타나는 수자에 대해 카운팅 해주어야 한다 (<code>n_digit_count</code> 함수를 사용한다.) 이때, xxx의 맨 앞자리에 0이 나와도 가능한 경우의 수 이므로(1xxx 이기 때문) <code>n_digit_count</code>의 <code>exclude_high_zero</code>를 false로 해주어야 한다.</li>
+</ul>
+<p>2xxx, 3xxx, 4xxx에 대해서도 마찬가지로 카운팅을 수행한다.</p>
+<p>다음으로 5xxx의 경우에는 다음과 같이 카운팅해야 한다.</p>
+<ul>
+<li>xxx에는 (000~432) 까지 가능하기 때문에 5는 총 433번 등장한다.</li>
+<li>맨 앞자릿수 5를 제거한 432는 이 과정을 똑같이 적용한다 (재귀 호출) 다만, 5432 와는 달리 맨 앞자리에 0이 등장한다는 것을 고려애햐 한다 (재귀 호출)</li>
+</ul>
+<p>위의 코드에서 <code>calc_remainder(string target, bool is_highest)</code>함수가 이 계산을 재귀적으로 호출하며 수행한다. 카운팅할 숫자를 string 형태로 넘겨서, 앞의 자릿수를 쉽게 제거할 수 있도록 하였다. <code>is_highest</code>는 맨 앞자리 숫자에 0이 포함되는 지 여부를 나타내는 것으로, 위의 예시에서 5432의 경우 true로 설정되고, 그 다음부터의 재귀 호출에서는 false로 설정된다.</p>
+<h3>느낀점</h3>
+<p>풀면서 숫자들이 너무 헷갈려서 어려웠고, 또한 집중을 잘 하지 못해서 푸는 데 시간이 오래 걸렸다. 뭔가 펜으로 그림을 그려가면서 푸는 것도 좋을 듯 하다.</p>
 
-                        <a class="anc" href="/cpp/index.html">
-                            <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-                                <p class="text-2xl font-semibold">
-                                cpp
-                                </p>
-
-                                <p class="text-xs">
-                                1 child nodes
-                                </p>
-
-                                <p class="text-xs">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                            </div>
-                        </a>
-
-                        <a class="anc" href="/node/index.html">
-                            <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-                                <p class="text-2xl font-semibold">
-                                node
-                                </p>
-
-                                <p class="text-xs">
-                                4 child nodes
-                                </p>
-
-                                <p class="text-xs">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                            </div>
-                        </a>
-
-                        <a class="anc" href="/linux/0/index.html">
-                            <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-                                <p class="text-2xl font-semibold">
-                                linux
-                                </p>
-
-                                <p class="text-xs">
-                                2 child nodes
-                                </p>
-
-                                <p class="text-xs">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                            </div>
-                        </a>
-
-                        <a class="anc" href="/rust/0/index.html">
-                            <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-                                <p class="text-2xl font-semibold">
-                                rust
-                                </p>
-
-                                <p class="text-xs">
-                                2 child nodes
-                                </p>
-
-                                <p class="text-xs">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                            </div>
-                        </a>
-
-                        <a class="anc" href="/daily/index.html">
-                            <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-                                <p class="text-2xl font-semibold">
-                                daily
-                                </p>
-
-                                <p class="text-xs">
-                                1 child nodes
-                                </p>
-
-                                <p class="text-xs">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                            </div>
-                        </a>
-
-                        <a class="anc" href="/ps/0/index.html">
-                            <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-                                <p class="text-2xl font-semibold">
-                                ps
-                                </p>
-
-                                <p class="text-xs">
-                                2 child nodes
-                                </p>
-
-                                <p class="text-xs">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                                <p class="text-xs text-right">
-
-                                </p>
-                            </div>
-                        </a>
-
-                        <div class="my-3">
-                            <div class="flex mx-auto w-min bg-gray-100 dark:bg-gray-700 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900 font-semibold">
-                                <div class="inline w-8 h-8 hover:bg-blue-700 dark:hover:bg-blue-400" ><p class="leading-8 text-center cursor-pointer">0</p></div>
-                                <div class="inline w-8 h-8 hover:bg-blue-700 dark:hover:bg-blue-400" ><p class="leading-8 text-center cursor-pointer">0</p></div>
-                                <div class="inline w-8 h-8 hover:bg-blue-700 dark:hover:bg-blue-400" ><p class="leading-8 text-center cursor-pointer">0</p></div>
-                                <div class="inline w-8 h-8 hover:bg-blue-700 dark:hover:bg-blue-400" ><p class="leading-8 text-center cursor-pointer">0</p></div>
-                                <div class="inline w-8 h-8 hover:bg-blue-700 dark:hover:bg-blue-400" ><p class="leading-8 text-center cursor-pointer">0</p></div>
-                            </div>
-                        </div>
-
-
-                    </div>
-
+    </div>
+</article>
 
                 </div>
             </div> 
-            <footer class="my-4 text-sm text-gray-700 dark:text-gray-200 text-center">
+            <footer class="py-4 text-sm text-gray-700 dark:text-gray-200 text-center">
                 © 2023. Taehyeon Kim All rights reserved.
             </footer>
-
         </div>
     </body>
 </html>
-
