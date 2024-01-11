@@ -2213,6 +2213,10 @@ select{
   gap: 0.5rem;
 }
 
+.break-words{
+  overflow-wrap: break-word;
+}
+
 .break-keep{
   word-break: keep-all;
 }
@@ -2562,11 +2566,6 @@ html, body {
 :is(.dark .dark\:text-gray-200){
   --tw-text-opacity: 1;
   color: rgb(229 231 235 / var(--tw-text-opacity));
-}
-
-:is(.dark .dark\:text-gray-300){
-  --tw-text-opacity: 1;
-  color: rgb(209 213 219 / var(--tw-text-opacity));
 }
 
 :is(.dark .dark\:text-gray-900){

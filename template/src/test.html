@@ -11,11 +11,11 @@
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 localStorage.theme = 'dark'
                 document.documentElement.classList.add('dark')
-              } else {
+            } else {
                 localStorage.theme = 'light'
                 document.documentElement.classList.remove('dark')
-              }
-              window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",   e => {
+            }
+            window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",   e => {
                 if(e.matches){
                     localStorage.theme = 'dark'
                     document.documentElement.classList.add('dark')
@@ -55,8 +55,8 @@
                 }
                 window.hljs.highlightAll();
                 window.hljs.initLineNumbersOnLoad();
-                const toggle = document.getElementById('toggle');
 
+                const toggle = document.getElementById('toggle');
                 toggle.addEventListener('click', () => {
                     if (localStorage.theme === 'dark') {
                         localStorage.theme = 'light' 
@@ -67,31 +67,28 @@
                       }
                 });
             }
-
-
             run();
         </script>
 
         <div id="main" class="p-5 md:container md:mx-auto lg:px-20 py-5 xl:px-48 box-border h-screen w-screen">
-                <div class="flex mb-2 text-blue-700 dark:text-blue-400 border-b-4 border-blue-700 dark:border-blue-400">
-                    <div class="grow">
-            <a class="inline-block" href="/">
-                <p
-                    class="text-3xl lg:text-4xl font-bold hover:text-gray-900 dark:hover:text-gray-200 transition-all duration-500 ease-in-out ">
-                    blog.argnmp</p>
-            </a>
-
-                    </div>
-                    <button id="toggle" class="cursor-pointer justify-center items-center p-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="dark:hidden w-4 h-4" viewBox="0 0 16 16">
-                            <path class="fill-gray-600" d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
-                          </svg>
-                          <svg xmlns="http://www.w3.org/2000/svg" class="hidden dark:block w-4 h-4" viewBox="0 0 16 16">
-                            <path class="fill-gray-400" d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
-                            <path class="fill-gray-400" d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z"/>
-                          </svg>
-                    </button>
+            <div class="flex mb-2 text-blue-700 dark:text-blue-400 border-b-4 border-blue-700 dark:border-blue-400">
+                <div class="grow">
+                    <a class="inline-block" href="/">
+                        <p
+                            class="text-3xl lg:text-4xl font-bold hover:text-gray-900 dark:hover:text-gray-200 transition-all duration-500 ease-in-out ">
+                            blog.argnmp</p>
+                    </a>
                 </div>
+                <button id="toggle" class="cursor-pointer justify-center items-center p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="dark:hidden w-4 h-4" viewBox="0 0 16 16">
+                        <path class="fill-gray-600" d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="hidden dark:block w-4 h-4" viewBox="0 0 16 16">
+                        <path class="fill-gray-400" d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+                        <path class="fill-gray-400" d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z"/>
+                    </svg>
+                </button>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
                 <div class="md:col-span-3">
                     <div class="flex md:flex-col p-2 text-gray-900 dark:text-gray-200">
@@ -122,191 +119,161 @@
                 </div>
                 <div class="grid-flow-row md:col-span-9 rounded-lg">
                     
-                     
-<article>
-    <section class="w-full">
-        <div class="mb-2 md:pl-5">
-            <p class="text-4xl md:text-5xl break-keep font-bold text-gray-700 dark:text-gray-300 py-1">baleifjaleifjaliefjaefoj 1019 책 페이지</p>
+<div class="md:pl-5">
+    
+    <a class="anc" href="/linux/linux audio.html">
+        <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+            <p class="text-2xl font-semibold">
+            linux audio
+            </p>
+            
+            <p class="text-xs break-words">
+            개요 arch linux에서 사운드가 출력되고 입력되는 방식을 설명한다. Advanced Linux Sound Architecture (ALSA) ALSA는 kernel에서 실행되는 sound mixer로, 사운드 카드를 직접 조작한다. arch wiki에서는 alsa를 다음과 같이 설명한다.  https:&#x2F;&#x2F;wiki.archlinux.org&#x2F;title&#x2F;Advanced_Linux_Sound_Architecture 
+            </p>
+            <p class="text-xs text-right">
+            2023-07-22
+            </p>
+            <p class="text-xs text-right">
+            Taehyeon Kim
+            </p>
         </div>
-        <div class="mb-4 md:pl-5">
-            <table class="text-left text-sm text-gray-700 dark:text-gray-200">
-                <tbody>
-                    <tr class="">
-                        <th scope="row" class="pr-4">
-                            alias
-                        </th>
-                        <td class="">undefined</td>
-                    </tr>
-                    <tr class="">
-                        <th scope="row" class="pr-4">
-                            author
-                        </th>
-                        <td class="">Taehyeon Kim</td>
-                    </tr>
-                    <tr class="">
-                        <th scope="row" class="pr-4">
-                            created at
-                        </th>
-                        <td class="">2023-12-04</td>
-                    </tr>
-                    <tr class="">
-                        <th scope="row" class="pr-4">
-                            tags 
-                        </th>
-                        <td class="">
-                             
-                            <p class="inline">#boj </p>
-                             
-                            <p class="inline">#ps </p>
-                            
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    </a>
+    
+    <a class="anc" href="/linux/mac os socket.html">
+        <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+            <p class="text-2xl font-semibold">
+            mac os socket
+            </p>
+            
+            <p class="text-xs">
+            문제 shutdown()으로 socket을 닫았을 때 다른 thread의 socket이 닫혔다는 신호가 가지 않는 문제가 있다. 해결 linux에서는 발생하지 않던 문제이다. 키보드 입력을 받는 thread에서, 다른 스레드가 client의 connection을 accept하기 위해 사용중인 socket을 shutdown()으로 닫으면 accept의 결과로  0보다 작거나 같은 값이 반환되는 것이 linux에서는 잘 수행되었으나, macOS에서는 반환되지 않았다. 
+            </p>
+            <p class="text-xs text-right">
+            2023-12-06
+            </p>
+            <p class="text-xs text-right">
+            Taehyeon Kim
+            </p>
         </div>
-    </section>
-    <div class="clear-none markdown-body mb-2 md:pl-5 leading-7 font-post">
-        <h3>문제</h3>
-<p><a href="https://www.acmicpc.net/problem/1019">https://www.acmicpc.net/problem/1019</a></p>
-<h3>코드</h3>
-<pre><code class="language-c++">#include &lt;cmath&gt;
-#include &lt;iostream&gt;
-#include &lt;cstdlib&gt;
-#include &lt;algorithm&gt;
-#include &lt;climits&gt;
-#include &lt;vector&gt;
-#include &lt;queue&gt;
-#include &lt;map&gt;
-#include &lt;unordered_map&gt;
-#include &lt;set&gt;
-#include &lt;unordered_set&gt;
-#include &lt;bitset&gt;
-#include &lt;cstring&gt;
-using namespace std;
-using ll = long long;
-string sn;
-ll n;
-ll co[10] = {0,};
-void print(){
-    for(int i = 0; i&lt;10; i++){
-        cout &lt;&lt; co[i] &lt;&lt; ' ';
-    }
-    cout &lt;&lt; endl;
-}
-void n_digit_count(int size, bool exclude_high_zero){
-    if(size &lt;= 0) return;
-    ll base_count = pow(10, size-1)*size;
-    for(int i = 1; i&lt;10; i++)
-        co[i] += base_count;
-    if(exclude_high_zero){
-        int tsize = size-1;
-        while(tsize&gt;=0){
-            base_count -= pow(10, tsize);
-            tsize -= 1;
-        }
-    }
-    co[0] += base_count;
-}
-void calc_remainder(string target, bool is_highest){
-    int digit = target[0]-48; 
-    int i = is_highest ? 1 : 0;
-    for(;i&lt;digit; i++){
-        co[i] += pow(10, target.length()-1);
-        n_digit_count(target.length()-1, false);
-    }
-    if(target.length() &gt; 1){
-        string modified = target.erase(0, 1);
-        co[digit] += atoll(modified.c_str()) + 1;
-        calc_remainder(modified, false);
-    }
-    else {
-        co[digit] += 1;
-    }
-}
-void solve(){
-    cin &gt;&gt; sn;
-    n = atoll(sn.c_str());
-    n_digit_count(sn.length()-1, true); 
-    calc_remainder(sn, true);
-    print();
-}
-int main(){
-    ios::sync_with_stdio(0);
-    cin.tie(0);
-    solve(); 
-    return 0;
-}
-</code></pre>
-<h3>풀이</h3>
-<p>n이 최대 10억이기 때문에, 직접 숫자를 counting 하는 방식으로는 해결이 불가능하다. 따라서 규칙을 찾아서 해결해야 한다.</p>
-<p>n이 543으로 주어진 경우를 생각해보자.</p>
-<p>먼저 n의 자릿수를 살펴보아야 한다. 5432의 경우는 네 자리이다. 최대 세 자리의 수로 만들수 있는 모든 페이지는 모두 포함되기 때문에, 최대 세 자리로 만들 수 있는 모든 페이지에 속하는 숫자의 개수를 먼저 세어주어야 한다.</p>
-<p>세 자리로 만들 수 있는 모든 수는 <code>000~999</code>이다. 이 수들 중에서 0의 개수는 다음과 같이 셀 수 있다.</p>
-<ul>
-<li>첫째 자리의 숫자가 0일 때 모든 가능한 조합(0xx): 10^2 가지 (다른 두 자리가 각각 10개의 숫자가 들어갈 수 있으므로)</li>
-<li>둘째 자리의 숫자가 0일 때 모든 가능한 조합(x0x): 10^2 가지 (다른 두 자리가 각각 10개의 숫자가 들어갈 수 있으므로)</li>
-<li>셋째 자리의 숫자가 0일 때 모든 가능한 조합(xx0): 10^2 가지 (다른 두 자리가 각각 10개의 숫자가 들어갈 수 있으므로)
-따라서 총 300개의 0이 이 범위에 포함되어 있다. 뿐만 아니라, <code>0~9</code>의 모든 숫자가 각각 300개씩 포함되어 있다.</li>
-</ul>
-<p>하지만 책 페이지의 경우 0, 01, 02, 001 과 같은 페이지는 존재하지 않기 때문에 이러한 경우의 0의 개수를 빼주어야 한다. 그러한 경우의 수는 다음과 같다</p>
-<ul>
-<li>첫째 자리의 숫자가 0일 때 모든 가능한 조합(0xx): 10^2 가지</li>
-<li>첫째, 둘째 자리의 숫자가 0일 때 모든 가능한 조합(00x): 10가지</li>
-<li>첫째, 둘째, 셋째 자리의 숫자가 0일 때 모든 가능한 조합(000): 1가지
-총 111개의 0이 포함되어 있다. 그래서 0의 경우는 300-111 = 189 개의 0이 존재한다.</li>
-</ul>
-<p>결론적으로 최대 세 자리의 페이지에서 나타나는 각 숫자의 개수는 다음과 같다. 주어진 테스트 케이스를 통해 이 개수가 맞다는 것을 확인할 수 있다.</p>
-<ul>
-<li>0: 189개</li>
-<li>1~9: 각 300개</li>
-</ul>
-<p>위의 함수 중 <code>n_digit_count(int size, bool exclude_high_zero)</code>가 이것을 계산한다. size는 자릿수를 의미하고, exclude_high_zero는 앞서 존재하지 않는 페이지에 대한 0의 개수를 빼줄지를 결정한다.</p>
-<p>다음으로는 나머지 페이지에 대해서 숫자의 갯수를 세어야 한다.</p>
-<p>앞서 5432의 경우 1<del>999 페이지 까지에서 등장하는 각 숫자의 개수를 구했다. 따라서 이제는 1000</del>5432 페이지에서 등장하는 각 숫자의 개수를 구해야 한다.</p>
-<pre><code class="language-shell">5432
-1 000~999
-2 000~999
-3 000~999
-4 000~999
-5 000~432
-  0 00~99
-  1 00~99
-  2 00~99
-  3 00~99
-  4 00~32
-    0 0~9
-    1 0~9
-    2 0~9
-    3 0~2
-      0
-      1
-      2
-
-</code></pre>
-<p>앞에서 부터 한 자리씩 해당 숫자와, 이 과정에서 등장하는 다른 자리의 숫자가 등장하는 횟수를 카운팅 하면 된다.
-여기서 중요한 것은 두가지를 함께 카운팅을 하는 것이다.</p>
-<ol>
-<li>현재 보고있는 자리의 숫자의 총 등장 횟수</li>
-<li>1번의 과정에서, 나타나는 하위 자리들에 있는 숫자들의 총 등장 횟수</li>
-</ol>
-<p>첫번째 줄에서는 다음과 같이 카운팅해야 한다. (1xxx)</p>
-<ul>
-<li>xxx에는 (000~999) 까지 가능하기 때문에 1은 총 1000번 등장한다.</li>
-<li>xxx에는 (000~999) 까지 가능하기 때문에, 처음에 먼저 계산하는데 사용한 방식을 따라 다른 자릿수에서 나타나는 수자에 대해 카운팅 해주어야 한다 (<code>n_digit_count</code> 함수를 사용한다.) 이때, xxx의 맨 앞자리에 0이 나와도 가능한 경우의 수 이므로(1xxx 이기 때문) <code>n_digit_count</code>의 <code>exclude_high_zero</code>를 false로 해주어야 한다.</li>
-</ul>
-<p>2xxx, 3xxx, 4xxx에 대해서도 마찬가지로 카운팅을 수행한다.</p>
-<p>다음으로 5xxx의 경우에는 다음과 같이 카운팅해야 한다.</p>
-<ul>
-<li>xxx에는 (000~432) 까지 가능하기 때문에 5는 총 433번 등장한다.</li>
-<li>맨 앞자릿수 5를 제거한 432는 이 과정을 똑같이 적용한다 (재귀 호출) 다만, 5432 와는 달리 맨 앞자리에 0이 등장한다는 것을 고려애햐 한다 (재귀 호출)</li>
-</ul>
-<p>위의 코드에서 <code>calc_remainder(string target, bool is_highest)</code>함수가 이 계산을 재귀적으로 호출하며 수행한다. 카운팅할 숫자를 string 형태로 넘겨서, 앞의 자릿수를 쉽게 제거할 수 있도록 하였다. <code>is_highest</code>는 맨 앞자리 숫자에 0이 포함되는 지 여부를 나타내는 것으로, 위의 예시에서 5432의 경우 true로 설정되고, 그 다음부터의 재귀 호출에서는 false로 설정된다.</p>
-<h3>느낀점</h3>
-<p>풀면서 숫자들이 너무 헷갈려서 어려웠고, 또한 집중을 잘 하지 못해서 푸는 데 시간이 오래 걸렸다. 뭔가 펜으로 그림을 그려가면서 푸는 것도 좋을 듯 하다.</p>
-
+    </a>
+    
+    <a class="anc" href="/linux/mac os shared memory.html">
+        <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+            <p class="text-2xl font-semibold">
+            mac os shared memory
+            </p>
+            
+            <p class="text-xs">
+            문제 m2 macbook에서 shared memory를 사용하는데, ftruncate가 제대로 작동하지 않는 문제가 있었다. 계속 Invalid argument 라는 에러가 발생했다. 구글링해도 문제가 안나오길래 혼자 열심히 테스트해보다가, 결국 원인을 찾아냈다. 해결 shm_open 후 제대로 shm_unlink를 하지 않아서 발생하는 문제였다. 제대로 shm_unlink가 되지 않은 shared memory file name을 다시 사용하니 문제가 발생했다. 
+            </p>
+            <p class="text-xs text-right">
+            2023-12-06
+            </p>
+            <p class="text-xs text-right">
+            Taehyeon Kim
+            </p>
+        </div>
+    </a>
+    
+    <a class="anc" href="/linux/linux 에서 cpu 정책 관리하기.html">
+        <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+            <p class="text-2xl font-semibold">
+            linux 에서 cpu 정책 관리하기
+            </p>
+            
+            <p class="text-xs">
+            cpupower cpupower 이라는 프로그램을 통해서 cpu의 max frequency, min frequency 나 governor을 편리하게 조정할 수 있다. yay -S cpupower 현재 내 cpu의 정보 확인하는 법 cat &#x2F;proc&#x2F;cpuinfo ![[Pasted image 20231111233354.png]] 현재 내가 사용중인 노트북의 cpu는 i5-6200u 이다. 이 cpu는 2개의 코어와 4개의 스레드를 가지고 있다. 그래서 cpuinfo를 확인해보면 스레드의 수만큼의 정보를 확인할 수 있다. 
+            </p>
+            <p class="text-xs text-right">
+            2023-07-24
+            </p>
+            <p class="text-xs text-right">
+            Taehyeon Kim
+            </p>
+        </div>
+    </a>
+    
+    <a class="anc" href="/linux/yay 명령어 모음.html">
+        <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+            <p class="text-2xl font-semibold">
+            yay 명령어 모음
+            </p>
+            
+            <p class="text-xs">
+            package 설치 yay -S [package name] package 삭제 yay -R [package name] dependencies도 함께 삭제하려면 다음의 명령어를 이용하면 된다. yay -Rns [package name] package 검색 yay -Ss [keyword] 설치된 package 검색 설치된 package를 나열하는 방법은 다음과 같다. yay -Q 설치된 package 중에서 검색하는 방법은 다음과 같다. 
+            </p>
+            <p class="text-xs text-right">
+            2023-07-23
+            </p>
+            <p class="text-xs text-right">
+            Taehyeon Kim
+            </p>
+        </div>
+    </a>
+    
+    <a class="anc" href="/linux/linux terminal colorscheme 적용하기.html">
+        <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+            <p class="text-2xl font-semibold">
+            linux terminal colorscheme 적용하기
+            </p>
+            
+            <p class="text-xs">
+            서론 보통 나는 gnome desktop과 같은 gui환경에서 terminal을, 그리고 neovim을 사용한다. 그래서 일반적으로는 256가지의 색상이 적용되어, neovim 이 gui환경에서는 vim plugin으로 colorscheme을 설치해도 무리없이 잘 적용이 된다. 그러던 중 arch linux로 갈아타고, gnome desktop manager을 직접 설치하면서 단축키 하나로 다른 tty에서 cui를 사용할 수 있다는 것을 알게 되었다. 그리고 cui를 사용하면 gnome에서 terminal을 사용하는 것 보다 훨씬 빠른 성능을 낼 수 있었다. 
+            </p>
+            <p class="text-xs text-right">
+            2023-05-14
+            </p>
+            <p class="text-xs text-right">
+            Taehyeon Kim
+            </p>
+        </div>
+    </a>
+    
+    <a class="anc" href="/linux/linux에서 bluetooth 연결 문제 해결법.html">
+        <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+            <p class="text-2xl font-semibold">
+            linux에서 bluetooth 연결 문제 해결법
+            </p>
+            
+            <p class="text-xs">
+            서론 arch linux를 잘 사용하던 중 갑자기 블루투스가 되질 않았다. arch linux에 desktop manager로 gnome을 사용중이어서 보통 gnome 설정의  bluetooth 항목에서 블루투스 키보드를 연결을 한다. 잘 안되길래 컴퓨터를 재부팅 해봤는데도 먹통이었다. 이럴 경우 다음과 같은 방법으로 해결이 가능하다. 
+            </p>
+            <p class="text-xs text-right">
+            2023-05-13
+            </p>
+            <p class="text-xs text-right">
+            Taehyeon Kim
+            </p>
+        </div>
+    </a>
+    
+    <a class="anc" href="/linux/vim, nvim 에서 텍스트 복사가 되지 않을 때.html">
+        <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+            <p class="text-2xl font-semibold">
+            vim, nvim 에서 텍스트 복사가 되지 않을 때
+            </p>
+            
+            <p class="text-xs">
+            서론 arch linux를 새로 설치하고 gnome desktop을 사용중인데 neovim에서 &quot;+y 로 사용하던 텍스트 복사가 작동하지 않았다. 그래서 구글링하여 찾아보던 중 해결책을 찾게 되었다. 해결 방법 vim 이나 neovim 에서 아래의 명령어를 입력한다. :checkhealth provider 
+            </p>
+            <p class="text-xs text-right">
+            2022-05-06
+            </p>
+            <p class="text-xs text-right">
+            Taehyeon Kim
+            </p>
+        </div>
+    </a>
+    
+    <div class="my-3">
+        <div class="flex mx-auto w-min bg-gray-100 dark:bg-gray-700 font-semibold">
+            
+        </div>
     </div>
-</article>
+    
+</div>
 
+                    
                 </div>
             </div> 
             <footer class="py-4 text-sm text-gray-700 dark:text-gray-200 text-center">
@@ -315,3 +282,4 @@ int main(){
         </div>
     </body>
 </html>
+
