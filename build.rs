@@ -9,6 +9,13 @@ fn main(){
         .status()
         .unwrap();
     println!("cargo:warning=wasm build end");
+    // println!("cargo:warning=wasm copy start");
+    // Command::new("cp")
+    //     .args(&["./dist/*", "../"])
+    //     .current_dir(&Path::new("./render"))
+    //     .status()
+    //     .unwrap();
+    // println!("cargo:warning=wasm copy end");
     println!("cargo:warning=template build start");
     Command::new("npm")
         .args(&["run", "build"])

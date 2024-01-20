@@ -140,7 +140,7 @@ impl Index {
         let chunk_array: Uint8Array = chunk_value.dyn_into().unwrap();
         let data = chunk_array.to_vec();
 
-        let pages: Vec<Page> = bincode::deserialize(&data).map_err(|_|"deserialize index failed")?;
+        let pages: Vec<Page> = bincode::deserialize(&data).map_err(|err|format!("debug: deserialize index failed: {:?}", err.to_string()))?;
         self.pages = pages;
         Ok(())
     }
