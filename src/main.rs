@@ -122,6 +122,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
 
                     let property = property.clone();
                     let mut context = tera::Context::new();
+                    context.insert("html_title", &property.title.clone().unwrap_or("undefined".to_string()));
                     context.insert("title", &property.title.unwrap_or("undefined".to_string()));
                     context.insert("alias", &property.alias.unwrap_or("undefined".to_string()));
                     context.insert("author", &property.author.unwrap_or("undefined".to_string()));
@@ -137,7 +138,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
 
                 },
                 NodeType::File(_) => {
-                    fs::copy_recursive(&source, &target).await?; 
+                    fs::copy_recursive(&source, &target, true).await?; 
                 }
             }
             *after_task_n.lock().await += 1;
@@ -154,7 +155,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
         panic!("before_task_n and after_task_n does not match");
     }
 
-    fs::copy_recursive(&PathBuf::from(&CONTEXT.config.r#static), &PathBuf::from(&CONTEXT.config.base).join("static")).await?;
+    for path in &CONTEXT.config.r#static {
+        fs::copy_recursive(&PathBuf::from(path), &PathBuf::from(&CONTEXT.config.base).join("static"), false).await?;
+    }
     // let search_indices = create_search_index(head.clone())?;
     // let exports = search_indices.into_iter().map(|index| {index}).collect::<Vec<SearchIndex>>();
     let search_indices = search_indices.write().await;

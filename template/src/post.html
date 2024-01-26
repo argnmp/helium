@@ -1,47 +1,48 @@
 {% extends "layout.html" %}
-{% block postblock%} 
-<article>
-    <section class="w-full">
-        <div class="mb-2 md:pl-5">
-            <p class="text-4xl md:text-5xl break-keep font-bold text-gray-700 dark:text-gray-200 py-1">{{title}}</p>
-        </div>
-        <div class="mb-4 md:pl-5">
-            <table class="text-left text-sm text-gray-700 dark:text-gray-200">
-                <tbody>
-                    <tr class="">
-                        <th scope="row" class="pr-4">
-                            alias
-                        </th>
-                        <td class="">{{alias}}</td>
-                    </tr>
-                    <tr class="">
-                        <th scope="row" class="pr-4">
-                            author
-                        </th>
-                        <td class="">{{author}}</td>
-                    </tr>
-                    <tr class="">
-                        <th scope="row" class="pr-4">
-                            created at
-                        </th>
-                        <td class="">{{created_at}}</td>
-                    </tr>
-                    <tr class="">
-                        <th scope="row" class="pr-4">
-                            tags 
-                        </th>
-                        <td class="">
-                            {% for tag in tags %} 
-                            <p class="inline">#{{tag}} </p>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-    <div class="clear-none markdown-body mb-2 md:pl-5 leading-7 font-post">
-        {{post}}
-    </div>
-</article>
+{% block postblock%}
+                    <article>
+                        <section class="w-full">
+                            <div class="mb-2 md:pl-5">
+                                <p class="text-4xl md:text-5xl break-keep font-bold text-gray-700 dark:text-gray-200 py-1">{{title}}</p>
+                            </div>
+                            <div class="mb-4 md:pl-5">
+                                <table class="text-left text-sm text-gray-700 dark:text-gray-200">
+                                    <tbody>
+                                        <tr class="">
+                                            <th scope="row" class="pr-4">
+                                                alias
+                                            </th>
+                                            <td class="">{{alias}}</td>
+                                        </tr>
+                                        <tr class="">
+                                            <th scope="row" class="pr-4">
+                                                author
+                                            </th>
+                                            <td class="">{{author}}</td>
+                                        </tr>
+                                        <tr class="">
+                                            <th scope="row" class="pr-4">
+                                                created at
+                                            </th>
+                                            <td class="">{{created_at}}</td>
+                                        </tr>
+                                        <tr class="">
+                                            <th scope="row" class="pr-4">
+                                                tags
+                                            </th>
+                                            <td class="">
+                                                {% for tag in tags %}
+                                                <p class="inline">#{{tag}} </p>
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                        <div class="clear-none markdown-body mb-10 md:pl-5 leading-7 font-post">
+                            {{post}}
+                        </div>
+                    </article>
+                    <div class="giscus mb-2 md:pl-5"></div>
 {% endblock postblock%}

@@ -1,46 +1,48 @@
 {% extends "layout.html" %}
 {% block listblock%}
-<div class="md:pl-5">
-    {% for element in list%}
-    <a class="anc" href="{{element.link}}">
-        <div class="mb-2 py-3 px-5 border-blue-700 dark:border-blue-400 bg-gray-100 dark:bg-gray-700 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-            <p class="text-2xl font-semibold">
-            {{element.title}}
-            </p>
-            {% if element.child_node > 0 %}
-            <p class="text-xs">
-            {{element.child_node}} child nodes
-            </p>
-            {% endif %}
-            <p class="text-xs break-words">
-            {{element.summarize}}
-            </p>
-            <p class="text-xs text-right">
-            {{element.created_at}}
-            </p>
-            <p class="text-xs text-right">
-            {{element.author}}
-            </p>
-        </div>
-    </a>
-    {% endfor %}
-    <div class="my-3">
-        <div class="flex mx-auto w-min bg-gray-100 dark:bg-gray-700 font-semibold">
-            {% for page in pages%}
-                <!-- <a class="anc w-8 h-8" href="{{page.href}}"> -->
-                {% if page.cursor == true %}
-                <a class="anc inline w-8 h-8 bg-blue-700 dark:bg-blue-400 text-gray-200 dark:text-gray-900" href="{{page.href}}">
-                    <p class="leading-8 text-center cursor-pointer">{{page.index}}</p>
-                </a>
-                {% else %}
-                <a class="anc inline w-8 h-8 hover:bg-blue-700 dark:hover:bg-blue-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900" href="{{page.href}}">
-                    <p class="leading-8 text-center cursor-pointer">{{page.index}}</p>
-                </a>
-                {% endif %}
-                <!-- </a> -->
-            {% endfor %}
-        </div>
-    </div>
-    
-</div>
+                    <div class="md:pl-5">
+                        {% for element in list%}
+                        <a class="anc" href="{{element.link}}">
+                            <div class="mb-2 py-3 px-5 border-customlight-700 dark:border-customdark-400 bg-gray-100 dark:bg-gray-700 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
+                                <p class="text-2xl font-semibold">
+                                {{element.title}}
+                                </p>
+                                {% if element.child_node > 0 %}
+                                <p class="text-xs">
+                                {{element.child_node}} child nodes
+                                </p>
+                                {% else %}
+                                <div class="pb-1 italic font-semibold ">
+                                <p class="text-xs inline-block underline decoration-solid">
+                                {{element.created_at}}
+                                </p>
+                                <p class="text-xs inline-block underline decoration-solid">
+                                {{element.author}}
+                                </p>
+                                </div>
+                                <p class="text-xs break-words">
+                                {{element.summarize}}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% endfor %}
+                        <div class="my-3">
+                            <div class="flex mx-auto w-min bg-gray-100 dark:bg-gray-700 font-semibold">
+                                {% for page in pages%}
+                                    <!-- <a class="anc w-8 h-8" href="{{page.href}}"> -->
+                                    {% if page.cursor == true %}
+                                    <a class="anc inline w-8 h-8 bg-customlight-700 dark:bg-customdark-400 text-gray-200 dark:text-gray-900" href="{{page.href}}">
+                                        <p class="leading-8 text-center cursor-pointer">{{page.index}}</p>
+                                    </a>
+                                    {% else %}
+                                    <a class="anc inline w-8 h-8 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900" href="{{page.href}}">
+                                        <p class="leading-8 text-center cursor-pointer">{{page.index}}</p>
+                                    </a>
+                                    {% endif %}
+                                    <!-- </a> -->
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
 {% endblock listblock%}

@@ -66,7 +66,7 @@ pub async fn write_from_slice(target: &Path, b: &[u8]) -> Result<(), Box<dyn Err
     Ok(())
 }
 
-pub async fn copy_recursive(from: &Path, to: &Path) -> Result<(), Box<dyn Error + Sync + Send>> {
+pub async fn copy_recursive(from: &Path, to: &Path, copy_dotfile: bool) -> Result<(), Box<dyn Error + Sync + Send>> {
     let mut q: VecDeque<(PathBuf, PathBuf)> = VecDeque::new();
     q.push_back((from.to_path_buf(), to.to_path_buf()));
     
@@ -84,7 +84,9 @@ pub async fn copy_recursive(from: &Path, to: &Path) -> Result<(), Box<dyn Error 
                 } 
             },
             false => {
-                copy(&cursor, &target).await?;
+                if copy_dotfile || !cursor.file_name().ok_or("no file name")?.to_str().ok_or("cannot convert to str")?.starts_with('.') {
+                    copy(&cursor, &target).await?;
+                }
             }
         }
     }

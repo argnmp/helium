@@ -12,7 +12,7 @@ pub enum ResourceFlag {
 pub struct Config {
     pub target: Vec<String>, 
     pub base: String,
-    pub r#static: String,
+    pub r#static: Vec<String>,
     pub template: String,
     pub resource: HashMap<ResourceFlag, String>,
 }

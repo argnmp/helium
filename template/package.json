@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "build": "npx tailwindcss -i ./src/main.css -o ./static/dist/main.css",
-    "watch": "nodemon --exec 'npx tailwindcss -i ./src/main.css -o ./static/dist/main.css --watch'"
+    "build": "npx tailwindcss -i ./src/main.css -o ./dist/main.css && cp ./src/giscus.css ./dist/giscus.css && cp ./src/index.js ./dist/index.js && cp ./src/app.js ./dist/app.js",
+    "watch": "nodemon --exec 'npx tailwindcss -i ./src/main.css -o ./dist/main.css --watch'"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.6",

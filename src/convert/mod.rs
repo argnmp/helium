@@ -88,6 +88,7 @@ pub async fn create_index_document(node: Arc<RwLock<Node>>) -> Result<(), Box<dy
             target.push("index.html");
             
             let mut context = tera::Context::new();
+            context.insert("html_title", "argnmp.github.io");
             context.insert("list", &list);
             
             let mut page_indices = Vec::new();

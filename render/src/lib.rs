@@ -74,14 +74,15 @@ impl Ground{
         Ok(())
     }
 
-    pub async fn load(&mut self, url: String) -> Result<(), JsValue> {
+    pub async fn load(&mut self, url: String, do_transition: bool) -> Result<(), JsValue> {
         let document = web_sys::window().ok_or("no window")?.document().ok_or("no document")?;
         let main = document.get_element_by_id("main").ok_or("current main id does not exist")?;
 
         let target = self.pages.get(&url).ok_or("requested page not cached")?;
         let target_main = target.get_element_by_id("main").ok_or("target main id does not exist")?;
-
-        main.replace_with_with_node_1(&target_main)?;
+        if do_transition {
+            main.replace_with_with_node_1(&target_main)?;
+        }
         
         // fetch using promise all
         // find all anchor tag anc cache
@@ -133,14 +134,21 @@ impl Index {
         let res = JsFuture::from(window.fetch_with_request(&request)).await?;
         let res: Response = res.dyn_into()?;
         let data = res.body().ok_or("body does not exist")?;
+        let mut binary: Vec<u8> = Vec::new();
         let reader: ReadableStreamDefaultReader = data.get_reader().dyn_into()?;
-        let result_value = JsFuture::from(reader.read()).await?;
-        let result: Object = result_value.dyn_into().unwrap();
-        let chunk_value = js_sys::Reflect::get(&result, &JsValue::from_str("value")).unwrap();
-        let chunk_array: Uint8Array = chunk_value.dyn_into().unwrap();
-        let data = chunk_array.to_vec();
+        loop {
+            let chunk = JsFuture::from(reader.read()).await?.dyn_into::<Object>()?;
+            let done = js_sys::Reflect::get(&chunk, &"done".into())?;
+            if done.is_truthy(){
+                break;
+            }
+            let chunk = js_sys::Reflect::get(&chunk, &"value".into())?.dyn_into::<Uint8Array>()?;
+            let binary_len = binary.len();
+            binary.resize(binary_len + chunk.length() as usize, 255);
+            chunk.copy_to(&mut binary[binary_len..]);
+        }
 
-        let pages: Vec<Page> = bincode::deserialize(&data).map_err(|err|format!("debug: deserialize index failed: {:?}", err.to_string()))?;
+        let pages: Vec<Page> = bincode::deserialize(&binary).map_err(|err|format!("debug: deserialize index failed: {:?}", err.to_string()))?;
         self.pages = pages;
         Ok(())
     }
