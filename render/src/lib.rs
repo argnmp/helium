@@ -53,6 +53,7 @@ impl Ground{
             let window = web_sys::window().unwrap();
             requests.push(&window.fetch_with_request(&request));
         }
+        // use promise_all
         let res = JsFuture::from(js_sys::Promise::all(&requests)).await?;
 
         let htmls = js_sys::Array::new();
@@ -75,13 +76,16 @@ impl Ground{
     }
 
     pub async fn load(&mut self, url: String, do_transition: bool) -> Result<(), JsValue> {
+        // web_sys::console::log_2(&"requested url:".into(), &url.clone().into());
+        // self.print_cache().await?;
         let document = web_sys::window().ok_or("no window")?.document().ok_or("no document")?;
         let main = document.get_element_by_id("main").ok_or("current main id does not exist")?;
 
         let target = self.pages.get(&url).ok_or("requested page not cached")?;
         let target_main = target.get_element_by_id("main").ok_or("target main id does not exist")?;
+        let target_main_clone = target_main.clone_node_with_deep(true)?;
         if do_transition {
-            main.replace_with_with_node_1(&target_main)?;
+            main.replace_with_with_node_1(&target_main_clone)?;
         }
         
         // fetch using promise all
@@ -91,9 +95,17 @@ impl Ground{
         for i in 0..collection.length() {
             let anc = collection.item(i).ok_or("invalid anc index")?;
             let href = anc.get_attribute("href").ok_or("href attribute does not exist")?;
+            // web_sys::console::log_1(&href.clone().into());
             hrefs.push(href);
         }
         self.add_many(hrefs).await?;
+        Ok(())
+    }
+
+    pub async fn print_cache(&mut self) -> Result<(), JsValue> {
+        self.pages.iter().for_each(|(k, _v)|{
+            web_sys::console::log_1(&k.into());
+        }); 
         Ok(())
     }
 }

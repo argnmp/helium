@@ -9,23 +9,9 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
         <script src="/static/index.js"></script>
         <script src="/static/app.js" type="module"></script>
-        <script src="https://giscus.app/client.js"
-        data-repo="argnmp/argnmp.github.io"
-        data-repo-id="R_kgDOLHjmWw"
-        data-category="Announcements"
-        data-category-id="DIC_kwDOLHjmW84CctmL"
-        data-mapping="title"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="1"
-        data-input-position="top"
-        data-theme="http://localhost:5500/static/giscus.css"
-        data-lang="ko"
-        crossorigin="anonymous"
-        async></script>
     </head>
     <body class="dark:bg-gray-800">
-        <div id="main" class="p-5 md:container md:mx-auto lg:px-20 py-5 xl:px-48 box-border h-screen w-screen">
+        <div class="p-5 md:container md:mx-auto lg:px-20 py-5 xl:px-48 box-border h-screen w-screen">
             <div class="flex text-customlight-700 dark:text-customdark-400 pb-2 mb-4 border-b-4 border-customlight-700 dark:border-customdark-400">
                 <div class="grow">
                     <a class="inline-block" href="/">
@@ -72,7 +58,7 @@
                         </div> 
                     </div>
                 </div>
-                <div class="grid-flow-row md:col-span-9 rounded-lg">
+                <div id="main" class="grid-flow-row md:col-span-9 rounded-lg">
                     {% block listblock %}{% endblock listblock %}
                     {% block postblock %}{% endblock postblock %}
                 </div>

@@ -15,7 +15,7 @@ reqwest = "0.11.22"
 serde = { version = "1.0.192", features = ["derive"] }
 wasm-bindgen = "0.2.87"
 wasm-bindgen-futures = "0.4.37"
-web-sys = { version = "0.3.64", features = ["Headers", "Request", "RequestInit", "RequestMode", "Response", "ReadableStream", "Window", "Document", "DomParser", "SupportedType", "Element", "HtmlCollection", "ReadableStreamDefaultReader"] }
+web-sys = { version = "0.3.64", features = ["Headers", "Request", "RequestInit", "RequestMode", "Response", "ReadableStream", "Window", "Document", "DomParser", "SupportedType", "Element", "HtmlCollection", "ReadableStreamDefaultReader", "Node", "Location", "console"] }
 
 [dependencies.xorf]
 version = "0.10.2"
