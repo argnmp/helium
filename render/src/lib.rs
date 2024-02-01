@@ -84,10 +84,6 @@ impl Ground{
         let target = self.pages.get(&url).ok_or("requested page not cached")?;
         let target_main = target.get_element_by_id("main").ok_or("target main id does not exist")?;
         let target_main_clone = target_main.clone_node_with_deep(true)?;
-        if do_transition {
-            main.replace_with_with_node_1(&target_main_clone)?;
-        }
-        
         // fetch using promise all
         // find all anchor tag anc cache
         let collection = target_main.get_elements_by_class_name("anc");
@@ -99,6 +95,12 @@ impl Ground{
             hrefs.push(href);
         }
         self.add_many(hrefs).await?;
+
+        // temporary fix: transition after fetching job
+        if do_transition {
+            main.replace_with_with_node_1(&target_main_clone)?;
+        }
+        
         Ok(())
     }
 
