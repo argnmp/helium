@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>조건부 trait bound</title>
+        <title>generic 사용법</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="/dist/main.css" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
-        <script src="/dist/index.js"></script>
-        <script src="/dist/app.js" type="module"></script>
+        <script src="/src/index.js"></script>
+        <script src="/src/app.js" type="module"></script>
     </head>
     <body class="dark:bg-gray-800">
         <div class="p-5 md:container md:mx-auto lg:px-20 py-5 xl:px-48 box-border h-screen w-screen">
@@ -52,12 +52,15 @@
                             <p class="text-xs md:text-center"><a class="text-xs" href="https://github.com/argnmp">github</a></p>
                         </div>
                     </div>
+                    <div id="toc" class="sticky top-5 mt-5 border-l-2">
+                        <p class="pl-4 pb-1 text-sm text-gray-900 dark:text-gray-200 cursor-pointer hover:text-custom-light-700 dark:hover:text-custom-light-400 hover:font-bold hover:underline" hidden>to load styles for dynamically created elements</ul>
+                    </div>
                 </div>
                 <div id="main" class="grid-flow-row md:col-span-9 rounded-lg">
-                    <div class="md:pl-5">
+                    <div id="searchModule" class="md:pl-5" hidden>
                         <div class="py-2">
                             <form class="flex">
-                                <input type="text" name="search" id="search_input" class="inline w-full rounded-md border-0 py-1 px-2 mr-2 text-gray-900 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-customlight-600 dark:focus:ring-customdark-300 sm:text-sm sm:leading-6 dark:bg-gray-800 dark:text-gray-200" onkeyup="window.search()">
+                                <input type="text" name="search" id="search_input" class="inline w-full rounded-md border-0 py-1 px-2 mr-2 text-gray-900 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-customlight-600 dark:focus:ring-customdark-300 sm:text-sm sm:leading-6 dark:bg-gray-800 dark:text-gray-200" placeholder="search for child nodes..." onkeyup="window.search()">
                                 <input type="submit" name="submit" id="submit" class="inline bg-customlight-700 hover:bg-white hover:text-customlight-700 border border-customlight-700 dark:border-customdark-400 text-gray-200 dark:bg-customdark-400 dark:text-gray-900 hover:dark:bg-gray-800 hover:dark:text-gray-200 rounded-md px-2 text-sm cursor-pointer" onclick="window.search()" value="search">
                             </form>
                         </div>
@@ -73,7 +76,7 @@
                     <article>
                         <section class="w-full">
                             <div class="mb-2 md:pl-5">
-                                <p class="text-4xl md:text-5xl break-keep font-bold text-gray-700 dark:text-gray-200 py-1">조건부 trait bound</p>
+                                <p class="text-4xl md:text-5xl break-keep font-bold text-gray-700 dark:text-gray-200 py-1">generic 사용법</p>
                             </div>
                             <div class="mb-4 md:pl-5">
                                 <table class="text-left text-sm text-gray-700 dark:text-gray-200">
@@ -94,7 +97,7 @@
                                             <th scope="row" class="pr-4">
                                                 created at
                                             </th>
-                                            <td class="">2022-07-26</td>
+                                            <td class="">2022-06-08</td>
                                         </tr>
                                         <tr class="">
                                             <th scope="row" class="pr-4">
@@ -109,36 +112,96 @@
                             </div>
                         </section>
                         <div class="clear-none markdown-body mb-10 md:pl-5 leading-7 font-post">
-                            <h2>개요</h2>
-<p>A라는 trait이 있다고 하자. A trait을 implement 해야 B trait도 implement가 가능하도록 만들고 싶은 경우에 대해 살펴본다.</p>
-<h2>첫번째 경우</h2>
-<pre><code class="language-rust">trait A {}
-trait B : A{}
+                            <h2 id="function">function</h2>
+<pre><code class="language-rust">fn ret&lt;T&gt;(param: T) -&gt; T{
+    param
+}
 </code></pre>
-<p>개요의 상황이다. 위의 코드와 같이 작성하면 된다.</p>
-<h2>두번째 경우</h2>
-<p><code>Debug</code>,<code>Display</code> trait을 implement 할 때 Prints trait을 implement 할 수 있도록 코드를 작성하려면 아래와 같이 하면 된다.</p>
-<pre><code class="language-rust">trait Prints: Debug + Display{
-    fn debug_print(&amp;self){
-        println!(&quot;I am: {self:?}&quot;);
+<pre><code class="language-rust">fn ret&lt;T1, T2&gt;(param1: T1, param2: T2) -&gt; (T1,T2){
+    (param1, param2)
+}
+</code></pre>
+<h2 id="struct">struct</h2>
+<pre><code class="language-rust">struct Point&lt;T&gt; {
+    x:T,
+    y:T,
+}
+</code></pre>
+<pre><code class="language-rust">struct Point&lt;T1, T2&gt; {
+    x:T1,
+    y:T2,
+}
+</code></pre>
+<h2 id="enum">enum</h2>
+<pre><code class="language-rust">enum Result&lt;T, E&gt; {
+    Ok(T),
+    Err(E),
+}
+</code></pre>
+<h2 id="method">method</h2>
+<pre><code class="language-rust">struct Point&lt;T&gt;{
+    x: T,
+    y: T,
+}
+impl&lt;T&gt; Point&lt;T&gt; {
+    fn getx(&amp;self) -&gt; &amp;T{
+        &amp;self.x
     }
-    fn display_print(&amp;self){
-        println!(&quot;I am: {self}&quot;);
+}
+impl Point&lt;f32&gt;{
+    fn flo() {
+        println!(&quot;specify f32&quot;);
     }
 }
 </code></pre>
-<h2>세번째 경우</h2>
-<p>앞서 작성한 <code>Prints</code> trait을 아무나 implement가 가능하게 하는 대신, 각 함수를 trait bound 된 대상이 implement 하고 있는 trait에 따라 사용할 수 있도록 하기 위핸 코드는 아래와 같다.</p>
-<pre><code class="language-rust">trait Prints{
-    fn debug_print(&amp;self) where Self: Debug{
-        println!(&quot;I am: {self:?}&quot;);
+<h2 id="trait bound">trait bound</h2>
+<p>특정한 trait을 가지고 있는 struct을 인수로 받고 싶을 때는 generic을 다음과 같이 사용한다.</p>
+<h3 id="generic을 사용하는 방법">generic을 사용하는 방법</h3>
+<pre><code class="language-rust">trait Greeting {
+    fn default(&amp;self)-&gt;String{
+        String::from(&quot;hello world&quot;)
     }
-    fn display_print(&amp;self) where Self: Display{
-        println!(&quot;I am: {self}&quot;);
-    }
+    fn special(&amp;self)-&gt;String;
+}
+fn greet&lt;T: Greeting&gt; (item: &amp;T){
+    println!(&quot;{}&quot;,item.default());
+    println!(&quot;{}&quot;,item.special()); 
 }
 </code></pre>
-<p><code>Prints</code>를 implement하는 struct가 있다고 할때, <code>Debug</code>를 implement 하는 경우 <code>debug_print</code>의 사용이 가능하고 <code>Display</code>를 implement 하는 경우 <code>display_print</code>의 사용이 가능하다.</p>
+<h3 id="추가: &amp;impl을 사용하는 방법">추가: &amp;impl을 사용하는 방법</h3>
+<p>generic 대신 다음과 같이 사용이 가능하다.</p>
+<pre><code class="language-rust">trait Greeting {
+    fn default(&amp;self)-&gt;String{
+        String::from(&quot;hello world&quot;)
+    }
+    fn special(&amp;self)-&gt;String;
+}
+fn greet (item: &amp;impl Greeting){
+    println!(&quot;{}&quot;,item.default());
+    println!(&quot;{}&quot;,item.special()); 
+}
+</code></pre>
+<h2 id="multiple trait bound">multiple trait bound</h2>
+<h3 id="generic을 사용하는 방법">generic을 사용하는 방법</h3>
+<h4 id="+ syntax">+ syntax</h4>
+<pre><code class="language-rust">    pub fn ret&lt;T: Display + Clone, U: Clone + Debug&gt; (t: T, u: U) -&gt; (T, U){
+        (t, u)
+    }
+</code></pre>
+<h4 id="where syntax">where syntax</h4>
+<pre><code class="language-rust">    pub fn ret&lt;T, U&gt; (t: T, u: U) -&gt; (T, U) where T: Display + Clone, U: Clone + Debug{
+        (t,u)
+    }
+</code></pre>
+<h3 id="추가: &amp;impl을 사용하는 방법">추가: &amp;impl을 사용하는 방법</h3>
+<h4 id="+ syntax">+ syntax</h4>
+<pre><code class="language-rust">    pub fn ret2(t: impl Display + Clone, u: impl Clone + Debug) -&gt; (impl Display + Clone, impl Clone + Debug){
+        (t,u)
+    }
+</code></pre>
+<p>참조자를 사용하고 싶은 경우 &amp;(impl Display + Clone) 이렇게 감싸주면 된다.</p>
+<p>이 코드에서는 Display, Clone trait을 가진 t와 Clone, Debug trait을 가진 u를 받아서 튜플로 반환을 한다. 하지만 impl로 반환을 하면 정의한 trait <strong>만</strong> 가진 채로 반환하게 되어서 컴파일 에러가 발생할 수도 있다.</p>
+<p>앞서 언급한 generic을 사용한 방법과 impl을 사용한 방법을 비교해보면 된다.</p>
 
                         </div>
                     </article>
