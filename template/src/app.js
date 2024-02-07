@@ -49,7 +49,14 @@ async function run() {
 
     // load searching module
     let n = Index.new();
-    await n.load("/static/searchindex");
+    let location = window.location.href.replace(/[^/]*$/, '');
+    const loc = location.split('/');
+    loc.pop();
+    if(loc.length > 0 && !isNaN(Number(loc[loc.length-1]))){
+        location = location.slice(0, location.length-1).replace(/[^/]*$/, '');
+    }
+        
+    await n.load(location + "searchindex");
     window.n = n;
     window.search = async function (e) {
         let text = document.getElementById(`search_input`).value;
@@ -66,6 +73,14 @@ async function run() {
             localStorage.theme = "dark";
             document.documentElement.classList.add("dark");
         }
+    });
+
+    // load search module
+    const searchToggle = document.getElementById("searchToggle");
+    const searchModule = document.getElementById("searchModule");
+
+    searchToggle.addEventListener("click", () => {
+        searchModule.hidden = !searchModule.hidden;
     });
 }
 run();

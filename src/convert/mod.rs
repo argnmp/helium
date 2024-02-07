@@ -1,5 +1,6 @@
-use std::{error::Error, path::PathBuf, collections::{VecDeque, HashSet, hash_map::DefaultHasher, HashMap}, sync::Arc, fmt::Debug};
+use std::{error::Error, path::PathBuf, collections::{VecDeque, HashSet, hash_map::DefaultHasher, HashMap}, sync::Arc, fmt::Debug, borrow::Cow};
 use markdown::{Options, ParseOptions, mdast::{Text, InlineCode, Code}};
+use regex::{RegexBuilder, Captures};
 use serde::{Serialize, Deserialize};
 
 use tokio::{fs::File, io::{BufWriter, AsyncWriteExt, BufReader, AsyncReadExt}, sync::{Mutex, RwLock}};
@@ -309,7 +310,22 @@ impl Document {
         }
         // dbg!(&raw);
         let html = markdown::to_html_with_options(&raw, &Options::gfm())?;
-        *self.html.lock().await = Some(html);
+        
+        let h2_regex = RegexBuilder::new(r"<h2>(.*?)<\/h2>").dot_matches_new_line(true).build()?;
+        let result = h2_regex.replace_all(&html, |caps: &Captures| {
+            format!("<h2 id=\"{}\">{}</h2>", &caps[1], &caps[1])
+        });
+
+        let mut html = Cow::Borrowed(&html);
+        for i in 1..7 {
+            let re = RegexBuilder::new(&format!(r"<h{}>(.*?)<\/h{}>", i, i)).dot_matches_new_line(true).build()?;
+            let result = re.replace_all(&*html.to_owned(), |caps: &Captures| {
+                format!("<h{} id=\"{}\">{}</h{}>",i, &caps[1], &caps[1], i)
+            }).to_string();
+            html = Cow::Owned(result);
+        }
+
+        *self.html.lock().await = Some(html.to_string());
         Ok(self)
     }
     pub async fn prepare_token(&self) -> Result<&Self, Box<dyn Error + Send + Sync>> {

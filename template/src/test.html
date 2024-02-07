@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title></title>
+        <title>조건부 trait bound</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="/dist/main.css" rel="stylesheet">
@@ -11,8 +11,7 @@
         <script src="/dist/app.js" type="module"></script>
     </head>
     <body class="dark:bg-gray-800">
-
-        <div id="main" class="p-5 md:container md:mx-auto lg:px-20 py-5 xl:px-48 box-border h-screen w-screen">
+        <div class="p-5 md:container md:mx-auto lg:px-20 py-5 xl:px-48 box-border h-screen w-screen">
             <div class="flex text-customlight-700 dark:text-customdark-400 pb-2 mb-4 border-b-4 border-customlight-700 dark:border-customdark-400">
                 <div class="grow">
                     <a class="inline-block" href="/">
@@ -21,6 +20,15 @@
                             blog.argnmp</p>
                     </a>
                 </div>
+                <button id="searchToggle" class="cursor-pointer justify-center items-center p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-gray-600 dark:stroke-gray-400"
+                        viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                        <path d="M21 21l-6 -6" />
+                    </svg>
+                </button>
                 <button id="toggle" class="cursor-pointer justify-center items-center p-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="dark:hidden w-4 h-4" viewBox="0 0 16 16">
                         <path class="fill-gray-600" d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
@@ -44,11 +52,13 @@
                             <p class="text-xs md:text-center"><a class="text-xs" href="https://github.com/argnmp">github</a></p>
                         </div>
                     </div>
-                    <div>
+                </div>
+                <div id="main" class="grid-flow-row md:col-span-9 rounded-lg">
+                    <div class="md:pl-5">
                         <div class="py-2">
-                            <form class="flex md:flex-col">
-                                <input type="text" name="search" id="search_input" class="inline w-full rounded-md border-0 py-1 px-2 mr-2 md:mr-0 md:mb-1 text-gray-900 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-customlight-600 dark:focus:ring-customdark-300 sm:text-sm sm:leading-6 dark:bg-gray-800 dark:text-gray-200" onkeyup="window.search()">
-                                <input type="submit" name="submit" id="submit" class="inline bg-customlight-700 hover:bg-white hover:text-customlight-700 border border-customlight-700 dark:border-customdark-400 text-gray-200 dark:bg-customdark-400 dark:text-gray-900 hover:dark:bg-gray-800 hover:dark:text-gray-200 rounded-md px-2 text-sm cursor-pointer md:w-full" onclick="window.search()" value="search">
+                            <form class="flex">
+                                <input type="text" name="search" id="search_input" class="inline w-full rounded-md border-0 py-1 px-2 mr-2 text-gray-900 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-customlight-600 dark:focus:ring-customdark-300 sm:text-sm sm:leading-6 dark:bg-gray-800 dark:text-gray-200" onkeyup="window.search()">
+                                <input type="submit" name="submit" id="submit" class="inline bg-customlight-700 hover:bg-white hover:text-customlight-700 border border-customlight-700 dark:border-customdark-400 text-gray-200 dark:bg-customdark-400 dark:text-gray-900 hover:dark:bg-gray-800 hover:dark:text-gray-200 rounded-md px-2 text-sm cursor-pointer" onclick="window.search()" value="search">
                             </form>
                         </div>
                         <div class="" id="search_result">
@@ -58,111 +68,81 @@
                             </a>
                         </div> 
                     </div>
-                </div>
-                <div class="grid-flow-row md:col-span-9 rounded-lg">
                     
-<div class="md:pl-5">
-    
-    <a class="anc" href="/project/index.html">
-        <div class="mb-2 py-3 px-5 border-customlight-700 dark:border-customdark-400 bg-gray-100 dark:bg-gray-700 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-            <p class="text-2xl font-semibold">
-            project
-            </p>
-            
-            <p class="text-xs">
-            10 child nodes
-            </p>
-            
-        </div>
-    </a>
-    
-    <a class="anc" href="/node/index.html">
-        <div class="mb-2 py-3 px-5 border-customlight-700 dark:border-customdark-400 bg-gray-100 dark:bg-gray-700 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-            <p class="text-2xl font-semibold">
-            node
-            </p>
-            
-            <p class="text-xs">
-            4 child nodes
-            </p>
-            
-        </div>
-    </a>
-    
-    <a class="anc" href="/linux/index.html">
-        <div class="mb-2 py-3 px-5 border-customlight-700 dark:border-customdark-400 bg-gray-100 dark:bg-gray-700 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-            <p class="text-2xl font-semibold">
-            linux
-            </p>
-            
-            <p class="text-xs">
-            8 child nodes
-            </p>
-            
-        </div>
-    </a>
-    
-    <a class="anc" href="/rust/1/index.html">
-        <div class="mb-2 py-3 px-5 border-customlight-700 dark:border-customdark-400 bg-gray-100 dark:bg-gray-700 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-            <p class="text-2xl font-semibold">
-            rust
-            </p>
-            
-            <p class="text-xs">
-            18 child nodes
-            </p>
-            
-        </div>
-    </a>
-    
-    <a class="anc" href="/daily/index.html">
-        <div class="mb-2 py-3 px-5 border-customlight-700 dark:border-customdark-400 bg-gray-100 dark:bg-gray-700 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-            <p class="text-2xl font-semibold">
-            daily
-            </p>
-            
-            <p class="text-xs">
-            1 child nodes
-            </p>
-            
-        </div>
-    </a>
-    
-    <a class="anc" href="/cpp/index.html">
-        <div class="mb-2 py-3 px-5 border-customlight-700 dark:border-customdark-400 bg-gray-100 dark:bg-gray-700 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-            <p class="text-2xl font-semibold">
-            cpp
-            </p>
-            
-            <p class="text-xs">
-            3 child nodes
-            </p>
-            
-        </div>
-    </a>
-    
-    <a class="anc" href="/ps/1/index.html">
-        <div class="mb-2 py-3 px-5 border-customlight-700 dark:border-customdark-400 bg-gray-100 dark:bg-gray-700 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900">
-            <p class="text-2xl font-semibold">
-            ps
-            </p>
-            
-            <p class="text-xs">
-            84 child nodes
-            </p>
-            
-        </div>
-    </a>
-    
-    <div class="my-3">
-        <div class="flex mx-auto w-min bg-gray-100 dark:bg-gray-700 font-semibold">
-            
-        </div>
-    </div>
-    
-</div>
+                    
+                    <article>
+                        <section class="w-full">
+                            <div class="mb-2 md:pl-5">
+                                <p class="text-4xl md:text-5xl break-keep font-bold text-gray-700 dark:text-gray-200 py-1">조건부 trait bound</p>
+                            </div>
+                            <div class="mb-4 md:pl-5">
+                                <table class="text-left text-sm text-gray-700 dark:text-gray-200">
+                                    <tbody>
+                                        <tr class="">
+                                            <th scope="row" class="pr-4">
+                                                alias
+                                            </th>
+                                            <td class="">undefined</td>
+                                        </tr>
+                                        <tr class="">
+                                            <th scope="row" class="pr-4">
+                                                author
+                                            </th>
+                                            <td class="">Taehyeon Kim</td>
+                                        </tr>
+                                        <tr class="">
+                                            <th scope="row" class="pr-4">
+                                                created at
+                                            </th>
+                                            <td class="">2022-07-26</td>
+                                        </tr>
+                                        <tr class="">
+                                            <th scope="row" class="pr-4">
+                                                tags
+                                            </th>
+                                            <td class="">
+                                                
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                        <div class="clear-none markdown-body mb-10 md:pl-5 leading-7 font-post">
+                            <h2>개요</h2>
+<p>A라는 trait이 있다고 하자. A trait을 implement 해야 B trait도 implement가 가능하도록 만들고 싶은 경우에 대해 살펴본다.</p>
+<h2>첫번째 경우</h2>
+<pre><code class="language-rust">trait A {}
+trait B : A{}
+</code></pre>
+<p>개요의 상황이다. 위의 코드와 같이 작성하면 된다.</p>
+<h2>두번째 경우</h2>
+<p><code>Debug</code>,<code>Display</code> trait을 implement 할 때 Prints trait을 implement 할 수 있도록 코드를 작성하려면 아래와 같이 하면 된다.</p>
+<pre><code class="language-rust">trait Prints: Debug + Display{
+    fn debug_print(&amp;self){
+        println!(&quot;I am: {self:?}&quot;);
+    }
+    fn display_print(&amp;self){
+        println!(&quot;I am: {self}&quot;);
+    }
+}
+</code></pre>
+<h2>세번째 경우</h2>
+<p>앞서 작성한 <code>Prints</code> trait을 아무나 implement가 가능하게 하는 대신, 각 함수를 trait bound 된 대상이 implement 하고 있는 trait에 따라 사용할 수 있도록 하기 위핸 코드는 아래와 같다.</p>
+<pre><code class="language-rust">trait Prints{
+    fn debug_print(&amp;self) where Self: Debug{
+        println!(&quot;I am: {self:?}&quot;);
+    }
+    fn display_print(&amp;self) where Self: Display{
+        println!(&quot;I am: {self}&quot;);
+    }
+}
+</code></pre>
+<p><code>Prints</code>를 implement하는 struct가 있다고 할때, <code>Debug</code>를 implement 하는 경우 <code>debug_print</code>의 사용이 가능하고 <code>Display</code>를 implement 하는 경우 <code>display_print</code>의 사용이 가능하다.</p>
 
-                    
+                        </div>
+                    </article>
+
                 </div>
             </div> 
             <footer class="py-4 text-sm text-gray-700 dark:text-gray-200 text-center">

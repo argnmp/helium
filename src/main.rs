@@ -6,6 +6,7 @@ use index::{NodeProperty, Node, NodeType, FileType, read_node, flatten_node, fla
 use lazy_static::lazy_static;
 
 use clap::Parser;
+use render::render_search_index;
 use template::Template;
 use tokenizer::Tokenizer;
 use tokio::{fs::{create_dir_all}, io::{AsyncReadExt, AsyncWriteExt}, sync::{RwLock, Mutex}};
@@ -16,6 +17,7 @@ mod index;
 mod template;
 mod convert;
 mod tokenizer;
+mod render;
 mod error;
 
 #[derive(Parser, Debug)]
@@ -89,7 +91,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
      * start rendering website
      */
     let included_files = Arc::new(included_files);
-    let search_indices = Arc::new(RwLock::new(Vec::new()));
+    // let search_indices = Arc::new(RwLock::new(Vec::new()));
     let mut handles = Vec::new();
     let flatten_nodes = flatten_node(head.clone()).await?;
     let before_task_n = flatten_nodes.len();
@@ -97,7 +99,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
     for node in flatten_nodes.into_iter() {
         let included_files = included_files.clone();
         let after_task_n = after_task_n.clone();
-        let search_indices = search_indices.clone();
+        // let search_indices = search_indices.clone();
         let handle = tokio::spawn(async move {
             let n = node.read().await;
             let NodeProperty { node_type, source, target,  .. } = &n.property;
@@ -133,8 +135,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
                     let commit = TEMPLATE.tera.render("post.html", &context).unwrap();
                     fs::write_from_string(&target, commit).await?;
 
-                    let search_index = convert::create_search_index(node.clone()).await?;
-                    search_indices.write().await.push(search_index);
+                    /* let search_index = convert::create_search_index(node.clone()).await?;
+                    search_indices.write().await.push(search_index); */
 
                 },
                 NodeType::File(_) => {
@@ -158,11 +160,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
     for path in &CONTEXT.config.r#static {
         fs::copy_recursive(&PathBuf::from(path), &PathBuf::from(&CONTEXT.config.base).join("static"), false).await?;
     }
-    // let search_indices = create_search_index(head.clone())?;
-    // let exports = search_indices.into_iter().map(|index| {index}).collect::<Vec<SearchIndex>>();
-    let search_indices = search_indices.write().await;
+
+    /*
+     * create search index for each layers
+     */
+
+    /* let search_indices = search_indices.write().await;
     let binary = bincode::serialize(&*search_indices)?;
-    fs::write_from_slice(&PathBuf::from(&CONTEXT.config.base).join("static/searchindex"), &binary[..]).await?;
+    fs::write_from_slice(&PathBuf::from(&CONTEXT.config.base).join("static/searchindex"), &binary[..]).await?; */
+
+    let _ = render_search_index(head.clone()).await?;
 
     Ok(())
 }
