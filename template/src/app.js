@@ -17,6 +17,7 @@ async function run() {
     let g = Ground.new();
     await g.add(window.location.pathname);
     await g.load(window.location.pathname, false);
+    /*
     document.querySelector("html").addEventListener(
         "click",
         async function (e) {
@@ -44,6 +45,7 @@ async function run() {
             window.location.href = location.pathname;
         }
     }
+    */
 
     // load searching module
     let n = Index.new();

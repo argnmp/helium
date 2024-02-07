@@ -94,13 +94,12 @@ impl Ground{
             // web_sys::console::log_1(&href.clone().into());
             hrefs.push(href);
         }
-        self.add_many(hrefs).await?;
-
         // temporary fix: transition after fetching job
         if do_transition {
             main.replace_with_with_node_1(&target_main_clone)?;
         }
-        
+
+        self.add_many(hrefs).await?;
         Ok(())
     }
 
