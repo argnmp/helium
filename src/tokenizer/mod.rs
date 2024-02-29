@@ -1,4 +1,4 @@
-use std::{fs::File, io::{BufWriter, Write}, collections::VecDeque, error::Error, sync::{Arc}, process::Stdio};
+use std::{collections::{BTreeSet, VecDeque}, error::Error, fs::File, io::{BufWriter, Write}, process::Stdio, sync::Arc};
 
 use tokio::{sync::{Mutex}, process::{Command, Child}, io::{AsyncWriteExt, BufReader, AsyncBufReadExt}};
 use serde::Deserialize;
@@ -39,6 +39,7 @@ pub struct ModuleQueue{
 }
 pub struct Tokenizer {
     queues: Arc<Mutex<ModuleQueue>>,
+    pub all_tokens: Arc<Mutex<BTreeSet<String>>>,
 }
 impl Drop for Tokenizer {
     fn drop(&mut self) {
@@ -71,6 +72,7 @@ impl Tokenizer {
 
         Ok(Tokenizer {
             queues: Arc::new(Mutex::new(ModuleQueue { ready })),
+            all_tokens: Arc::new(Mutex::new(BTreeSet::new())),
         })
     }
 
@@ -105,6 +107,9 @@ impl Tokenizer {
                     drop(queues);
 
                     let token: Token = serde_json::from_str(&output)?;
+                    
+                    /* let mut all_tokens = self.all_tokens.lock().await;
+                    all_tokens.extend(token.data.clone()); */
                     
                     return Ok(token);
                 },

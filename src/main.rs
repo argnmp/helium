@@ -9,7 +9,7 @@ use clap::Parser;
 use render::render_search_index;
 use template::Template;
 use tokenizer::Tokenizer;
-use tokio::{fs::{create_dir_all}, io::{AsyncReadExt, AsyncWriteExt}, sync::{RwLock, Mutex}};
+use tokio::{fs::create_dir_all, io::{AsyncReadExt, AsyncWriteExt}, sync::{Mutex, RwLock}, time::Instant};
 
 mod ctx;
 mod fs;
@@ -39,13 +39,14 @@ lazy_static! {
         t
     };
     static ref TOKENIZER: Tokenizer = {
-        let tokenizer = Tokenizer::new(10).unwrap();
+        let tokenizer = Tokenizer::new(5).unwrap();
         tokenizer
     };
 }
 
-#[tokio::main]
+#[tokio::main(flavor="multi_thread", worker_threads=32)]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
+    let start_time = Instant::now();
 
     let head = Node::new(NodeProperty::new(CONTEXT.config.base.clone().into(), CONTEXT.config.base.clone().into(), "/".into()).await?, None, Vec::new());
     for target in &CONTEXT.config.target {
@@ -171,5 +172,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
 
     let _ = render_search_index(head.clone()).await?;
 
+    let elapsed_time = start_time.elapsed();
+    println!("Elapsed: {:?}", elapsed_time);
+    
+    /* let all_tokens = TOKENIZER.all_tokens.lock().await;
+    for s in &*all_tokens {
+        print!("{} ", s);
+    } */
     Ok(())
 }

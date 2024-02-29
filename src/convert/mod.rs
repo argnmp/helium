@@ -32,9 +32,15 @@ impl List {
 
 #[derive(Serialize)]
 struct Page {
-    index: usize,
+    index: i32,
     cursor: bool,
     href: String,
+}
+#[derive(Serialize)]
+struct Prop {
+    paged: bool,
+    bottom_href: Option<String>,
+    top_href: Option<String>,
 }
 
 pub async fn create_index_document(node: Arc<RwLock<Node>>) -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -93,15 +99,52 @@ pub async fn create_index_document(node: Arc<RwLock<Node>>) -> Result<(), Box<dy
             context.insert("list", &list);
             
             let mut page_indices = Vec::new();
+            let mut prop = Prop {paged: false, bottom_href: None, top_href: None};
             if let DirType::Page(index, total) = dir_type {
-                for i in 1..total+1 {
+                let indexing_size = 3;
+                let mut s: i32 = *index as i32 - indexing_size;
+                let mut e: i32 = *index as i32 + indexing_size;
+                if s <= 0 {
+                    let diff = 1-s;
+                    s += diff;
+                    e += diff;
+                }
+                if e > *total as i32 {
+                    let diff = e - *total as i32;
+                    s -= diff;
+                    e -= diff;
+                }
+                if s <= 0 {
+                    let diff = 1-s;
+                    s += diff;
+                }
+
+                for i in s..e+1 {
                     let mut rel = rel.clone();
                     rel.pop();
                     rel.push(&i.to_string());
-                    page_indices.push(Page { index: i, cursor: i == *index, href: rel.to_str().ok_or("cannot convert path to str")?.to_owned()});
+                    page_indices.push(Page { index: i, cursor: i == *index as i32, href: rel.to_str().ok_or("cannot convert path to str")?.to_owned()});
                 }
+
+                let mut bottom: i32 = *index as i32 - (indexing_size + 1);
+                let mut top: i32 = *index as i32 + (indexing_size + 1);
+                if bottom <= 0 {
+                    bottom = 1; 
+                }
+                if top > *total as i32 {
+                    top = *total as i32;
+                }
+                prop.paged = true;
+                let mut rel = rel.clone();
+                rel.pop();
+                rel.push(&bottom.to_string());
+                prop.bottom_href = Some(rel.to_str().ok_or("cannot convert path to str")?.to_owned());
+                rel.pop();
+                rel.push(&top.to_string());
+                prop.top_href = Some(rel.to_str().ok_or("cannot convert path to str")?.to_owned());
             }
             context.insert("pages", &page_indices);
+            context.insert("prop", &prop);
 
             let commit = TEMPLATE.tera.render("list.html", &context)?;
             let f = File::options().write(true).create(true).open(target).await?;
@@ -340,6 +383,7 @@ impl Document {
             token.extend(whitespace_token.into_iter());
 
             let res = TOKENIZER.tokenize(&t).await?;
+            // println!("from: {:?}, to: {:?}", &t, &res);
             token.extend(res.data.into_iter().filter(|token|{!stop_words.contains(&token)}));
         }
         if let Some(title) = &self.property.title {

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>generic 사용법</title>
+        <title>linux audio</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="/dist/main.css" rel="stylesheet">
@@ -76,7 +76,7 @@
                     <article>
                         <section class="w-full">
                             <div class="mb-2 md:pl-5">
-                                <p class="text-4xl md:text-5xl break-keep font-bold text-gray-700 dark:text-gray-200 py-1">generic 사용법</p>
+                                <p class="text-4xl md:text-5xl break-keep font-bold text-gray-700 dark:text-gray-200 py-1">linux audio</p>
                             </div>
                             <div class="mb-4 md:pl-5">
                                 <table class="text-left text-sm text-gray-700 dark:text-gray-200">
@@ -97,7 +97,7 @@
                                             <th scope="row" class="pr-4">
                                                 created at
                                             </th>
-                                            <td class="">2022-06-08</td>
+                                            <td class="">2023-07-22</td>
                                         </tr>
                                         <tr class="">
                                             <th scope="row" class="pr-4">
@@ -112,96 +112,28 @@
                             </div>
                         </section>
                         <div class="clear-none markdown-body mb-10 md:pl-5 leading-7 font-post">
-                            <h2 id="function">function</h2>
-<pre><code class="language-rust">fn ret&lt;T&gt;(param: T) -&gt; T{
-    param
-}
-</code></pre>
-<pre><code class="language-rust">fn ret&lt;T1, T2&gt;(param1: T1, param2: T2) -&gt; (T1,T2){
-    (param1, param2)
-}
-</code></pre>
-<h2 id="struct">struct</h2>
-<pre><code class="language-rust">struct Point&lt;T&gt; {
-    x:T,
-    y:T,
-}
-</code></pre>
-<pre><code class="language-rust">struct Point&lt;T1, T2&gt; {
-    x:T1,
-    y:T2,
-}
-</code></pre>
-<h2 id="enum">enum</h2>
-<pre><code class="language-rust">enum Result&lt;T, E&gt; {
-    Ok(T),
-    Err(E),
-}
-</code></pre>
-<h2 id="method">method</h2>
-<pre><code class="language-rust">struct Point&lt;T&gt;{
-    x: T,
-    y: T,
-}
-impl&lt;T&gt; Point&lt;T&gt; {
-    fn getx(&amp;self) -&gt; &amp;T{
-        &amp;self.x
-    }
-}
-impl Point&lt;f32&gt;{
-    fn flo() {
-        println!(&quot;specify f32&quot;);
-    }
-}
-</code></pre>
-<h2 id="trait bound">trait bound</h2>
-<p>특정한 trait을 가지고 있는 struct을 인수로 받고 싶을 때는 generic을 다음과 같이 사용한다.</p>
-<h3 id="generic을 사용하는 방법">generic을 사용하는 방법</h3>
-<pre><code class="language-rust">trait Greeting {
-    fn default(&amp;self)-&gt;String{
-        String::from(&quot;hello world&quot;)
-    }
-    fn special(&amp;self)-&gt;String;
-}
-fn greet&lt;T: Greeting&gt; (item: &amp;T){
-    println!(&quot;{}&quot;,item.default());
-    println!(&quot;{}&quot;,item.special()); 
-}
-</code></pre>
-<h3 id="추가: &amp;impl을 사용하는 방법">추가: &amp;impl을 사용하는 방법</h3>
-<p>generic 대신 다음과 같이 사용이 가능하다.</p>
-<pre><code class="language-rust">trait Greeting {
-    fn default(&amp;self)-&gt;String{
-        String::from(&quot;hello world&quot;)
-    }
-    fn special(&amp;self)-&gt;String;
-}
-fn greet (item: &amp;impl Greeting){
-    println!(&quot;{}&quot;,item.default());
-    println!(&quot;{}&quot;,item.special()); 
-}
-</code></pre>
-<h2 id="multiple trait bound">multiple trait bound</h2>
-<h3 id="generic을 사용하는 방법">generic을 사용하는 방법</h3>
-<h4 id="+ syntax">+ syntax</h4>
-<pre><code class="language-rust">    pub fn ret&lt;T: Display + Clone, U: Clone + Debug&gt; (t: T, u: U) -&gt; (T, U){
-        (t, u)
-    }
-</code></pre>
-<h4 id="where syntax">where syntax</h4>
-<pre><code class="language-rust">    pub fn ret&lt;T, U&gt; (t: T, u: U) -&gt; (T, U) where T: Display + Clone, U: Clone + Debug{
-        (t,u)
-    }
-</code></pre>
-<h3 id="추가: &amp;impl을 사용하는 방법">추가: &amp;impl을 사용하는 방법</h3>
-<h4 id="+ syntax">+ syntax</h4>
-<pre><code class="language-rust">    pub fn ret2(t: impl Display + Clone, u: impl Clone + Debug) -&gt; (impl Display + Clone, impl Clone + Debug){
-        (t,u)
-    }
-</code></pre>
-<p>참조자를 사용하고 싶은 경우 &amp;(impl Display + Clone) 이렇게 감싸주면 된다.</p>
-<p>이 코드에서는 Display, Clone trait을 가진 t와 Clone, Debug trait을 가진 u를 받아서 튜플로 반환을 한다. 하지만 impl로 반환을 하면 정의한 trait <strong>만</strong> 가진 채로 반환하게 되어서 컴파일 에러가 발생할 수도 있다.</p>
-<p>앞서 언급한 generic을 사용한 방법과 impl을 사용한 방법을 비교해보면 된다.</p>
+                            <h2 id="개요">개요</h2>
+<p>arch linux에서 사운드가 출력되고 입력되는 방식을 설명한다.</p>
+<h2 id="Advanced Linux Sound Architecture (ALSA)">Advanced Linux Sound Architecture (ALSA)</h2>
+<p>ALSA는 kernel에서 실행되는 sound mixer로, 사운드 카드를 직접 조작한다.</p>
+<p>arch wiki에서는 alsa를 다음과 같이 설명한다.
+<a href="https://wiki.archlinux.org/title/Advanced_Linux_Sound_Architecture">https://wiki.archlinux.org/title/Advanced_Linux_Sound_Architecture</a></p>
+<blockquote>
+<p>The Advanced Linux Sound Architecture (ALSA) provides kernel driven sound card drivers.</p>
+</blockquote>
+<p>ALSA는 kernel로 작동되는 사운드 카드 드라이버를 제공한다.</p>
+<blockquote>
+<p>Besides the sound device drivers, ALSA also bundles a user space driven library for application developers. They can then use those ALSA drivers for high level API development. This enables direct (kernel) interaction with sound devices through ALSA libraries</p>
+</blockquote>
+<p>sound device driver만 제공하는 것이 아니라 user space에서 실행 가능한 library를 제공한다. application developers는 이 library를 가지고 high level api를 개발할 수 있다. 또한 이 alsa가 제공하는 library로 sound device에 직접 접근이 가능하다.</p>
+<p>alsa는 arch linux에서 이미 기본 kernel module에 포함되어 있기 때문에 다른 설정이 필요하지 않다.</p>
+<h2 id="Pulseaudio">Pulseaudio</h2>
+<p><a href="https://wiki.archlinux.org/title/PulseAudio#Front-ends">https://wiki.archlinux.org/title/PulseAudio#Front-ends</a></p>
+<blockquote>
+<p>PulseAudio is a general purpose sound server intended to run as a middleware between your applications and your hardware devices, either using ALSA or OSS.</p>
+</blockquote>
+<p>PulseAudio는 ALSA 나 OSS를 이용하여 application과 hardware device 사이의 middleware 역할을 하는 sound server이다.</p>
+<p>사운드 카드에 대한 하드웨어적인 접근은 ALSA kernel mode에서 담당하고, pulseaudio는 kernel과 user application 을 연결해주는 middleware의 역할을 한다.</p>
 
                         </div>
                     </article>

@@ -52,6 +52,7 @@ async function load_darkmode_module(){
 async function load_toc_module(){
     const tocDataset = [];
     // register observer
+    /*
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             let cur = tocDataset[Number(entry.target.dataset.index)]
@@ -64,6 +65,7 @@ async function load_toc_module(){
             }
         })
     });
+    */
 
 
     // create toc elements
@@ -82,7 +84,7 @@ async function load_toc_module(){
     let idx = 0;
     for(const heading of headings){
         // observe heading
-        observer.observe(heading);
+        // observer.observe(heading);
 
         heading.classList.add('cursor-pointer', 'hover:text-customlight-700', 'dark:hover:text-customdark-400');
         heading.addEventListener('click', (e)=>{

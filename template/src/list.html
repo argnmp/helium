@@ -28,9 +28,15 @@
                         </a>
                         {% endfor %}
                         <div class="my-3">
-                            <div class="flex mx-auto w-min bg-gray-100 dark:bg-gray-700 font-semibold">
+                            <div class="flex mx-auto w-min bg-gray-100 dark:bg-gray-700 text-sm">
+                                {% if prop.paged == true%}
+                                <a class="anc inline w-8 h-8 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900" href="{{prop.bottom_href}}">
+                                    <div class="w-8 h-8 p-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" /></svg>
+                                    </div>
+                                </a>
+                                {% endif %}
                                 {% for page in pages%}
-                                    <!-- <a class="anc w-8 h-8" href="{{page.href}}"> -->
                                     {% if page.cursor == true %}
                                     <a class="anc inline w-8 h-8 bg-customlight-700 dark:bg-customdark-400 text-gray-200 dark:text-gray-900" href="{{page.href}}">
                                         <p class="leading-8 text-center cursor-pointer">{{page.index}}</p>
@@ -40,8 +46,14 @@
                                         <p class="leading-8 text-center cursor-pointer">{{page.index}}</p>
                                     </a>
                                     {% endif %}
-                                    <!-- </a> -->
                                 {% endfor %}
+                                {% if prop.paged == true%}
+                                <a class="anc inline w-8 h-8 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900" href="{{prop.top_href}}">
+                                    <div class="w-8 h-8 p-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M13 18l6 -6" /><path d="M13 6l6 6" /></svg>
+                                    </div>
+                                </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
