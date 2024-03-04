@@ -21,6 +21,8 @@ impl Ground{
         }
     }
     pub async fn add(&mut self, url: String) -> Result<(), JsValue> {
+        // web_sys::console::log_2(&"add url:".into(), &url.clone().into());
+        // self.print_cache().await?;
         let mut opts = RequestInit::new();
         opts.method("GET");
         opts.mode(RequestMode::Cors);
@@ -75,17 +77,12 @@ impl Ground{
         Ok(())
     }
 
-    pub async fn load(&mut self, url: String, do_transition: bool) -> Result<(), JsValue> {
-        // web_sys::console::log_2(&"requested url:".into(), &url.clone().into());
+    pub async fn add_included_anc(&mut self, url: String) -> Result<(), JsValue> {
+        // web_sys::console::log_2(&"add_included_anc url:".into(), &url.clone().into());
         // self.print_cache().await?;
-        let document = web_sys::window().ok_or("no window")?.document().ok_or("no document")?;
-        let main = document.get_element_by_id("main").ok_or("current main id does not exist")?;
-
         let target = self.pages.get(&url).ok_or("requested page not cached")?;
+        // web_sys::console::log_2(&"add_included_anc document:".into(), &target.clone().into());
         let target_main = target.get_element_by_id("main").ok_or("target main id does not exist")?;
-        let target_main_clone = target_main.clone_node_with_deep(true)?;
-        // fetch using promise all
-        // find all anchor tag anc cache
         let collection = target_main.get_elements_by_class_name("anc");
         let mut hrefs = Vec::new();
         for i in 0..collection.length() {
@@ -94,12 +91,21 @@ impl Ground{
             // web_sys::console::log_1(&href.clone().into());
             hrefs.push(href);
         }
-        // temporary fix: transition after fetching job
-        if do_transition {
-            main.replace_with_with_node_1(&target_main_clone)?;
-        }
-
         self.add_many(hrefs).await?;
+
+        Ok(())
+    }
+
+    pub async fn load(&mut self, url: String) -> Result<(), JsValue> {
+        // web_sys::console::log_2(&"load url:".into(), &url.clone().into());
+        // self.print_cache().await?;
+        let document = web_sys::window().ok_or("no window")?.document().ok_or("no document")?;
+        let main = document.get_element_by_id("main").ok_or("current main id does not exist")?;
+
+        let target = self.pages.get(&url).ok_or("requested page not cached")?;
+        let target_main = target.get_element_by_id("main").ok_or("target main id does not exist")?;
+        let target_main_clone = target_main.clone_node_with_deep(true)?;
+        main.replace_with_with_node_1(&target_main_clone)?;
         Ok(())
     }
 

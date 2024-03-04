@@ -44,7 +44,7 @@ lazy_static! {
     };
 }
 
-#[tokio::main(flavor="multi_thread", worker_threads=32)]
+#[tokio::main(flavor="multi_thread", worker_threads=8)]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
     let start_time = Instant::now();
 
@@ -87,6 +87,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
             _ => {}
         }
     }
+    let elapsed_time = start_time.elapsed();
+    println!("Before rendering elapsed: {:?}", elapsed_time);
 
     /*
      * start rendering website

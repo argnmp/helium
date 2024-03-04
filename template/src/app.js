@@ -2,7 +2,7 @@ import init, { Ground, Index } from "/static/render.js";
 
 // external module should be re-called every page switch
 async function load_external_modules(){
-
+    console.log("highlight");
     // load highlight module    
     window.hljs.highlightAll();
     window.hljs.initLineNumbersOnLoad();
@@ -71,6 +71,11 @@ async function load_toc_module(){
     // create toc elements
     const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
     const toc = document.getElementById('toc');
+    // reset toc
+    while (toc.firstChild) {
+        toc.removeChild(toc.lastChild);
+    }
+
     const root = document.createElement('ul');
     const stk = [{layer: 0, elem: root}]; 
     const get_layer = (heading) => {
@@ -115,46 +120,66 @@ async function load_toc_module(){
     toc.appendChild(root);
 
 }
+async function load_cache_module(){
+    const set_events = async () => {
+        const ancs = document.getElementsByClassName('anc');
+        for(const anc of ancs){
+            anc.addEventListener("click",
+                async function (e) {
+                    e.preventDefault();
+                    try {
+                        const nextHref = anc.getAttribute("href");
+                        history.pushState(null, null, nextHref);
+                        await g.load(nextHref, true);
+                        await g.add_included_anc(nextHref);
+                        set_events();
+                        await load_toc_module();
+                        await load_searching_module();
+                        await load_external_modules();
+                    } catch (e) {
+                        console.log(e);
+                        window.location.href = anc.href;
+                    }
+                },
+                false
+            )
+        }
+
+    }
+    // load caching module
+    let g = Ground.new();
+    window.g = g;
+    // await g.add(window.location.pathname);
+    await g.add(decodeURI(window.location.pathname));
+    await g.load(decodeURI(window.location.pathname));
+    // because the main id element is re loaded, loading modules regarding to child elements of main should occur next.
+    await g.add_included_anc(decodeURI(window.location.pathname));
+    await load_external_modules();
+
+    await set_events();
+    
+    window.onpopstate = async (e) => {
+        e.preventDefault();
+        try {
+            await g.load(decodeURI(window.location.pathname), true);
+            // await g.add_included_anc(decodeURI(window.location.pathname));
+            await set_events();
+            await load_toc_module();
+            await load_searching_module();
+            await load_external_modules();
+        } catch (e) {
+            console.log(e);
+            window.location.href = window.location.pathname;
+        }
+    }
+}
+
 
 async function run() {
     await init();
 
-    // load external module
-    await load_external_modules();
-
-    // load caching module
-    let g = Ground.new();
-    await g.add(window.location.pathname);
-    await g.load(window.location.pathname, false);
-    /*
-    document.querySelector("html").addEventListener(
-        "click",
-        async function (e) {
-            e.preventDefault();
-            var anchor = e.target.closest("a");
-            if (anchor !== null) {
-                try {
-                    const nextHref = anchor.getAttribute("href");
-                    await g.load(nextHref, true);
-                    history.pushState(null, null, nextHref);
-                    await load_external_modules();
-                } catch (e) {
-                    window.location.href = anchor.href;
-                }
-            }
-        },
-        false
-    );
-    window.onpopstate = async (e) => {
-        e.preventDefault();
-        try {
-            await g.load(location.pathname, true);
-            load_external_modules();
-        } catch (e) {
-            window.location.href = location.pathname;
-        }
-    }
-    */
+    // load caching moddule
+    await load_cache_module();
 
     load_toc_module();
     load_darkmode_module();
