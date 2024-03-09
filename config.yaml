@@ -19,9 +19,3 @@ static:
 
 template:
   ./template/src/*.html
-
-resource:
-  element:
-    ./template/src/element.html
-  layout: 
-    ./template/src/layout.html  

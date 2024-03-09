@@ -14,7 +14,6 @@ pub struct Config {
     pub base: String,
     pub r#static: Vec<String>,
     pub template: String,
-    pub resource: HashMap<ResourceFlag, String>,
 }
 
 pub struct Context {
