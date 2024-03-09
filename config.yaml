@@ -6,7 +6,7 @@ target:
   - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/3. Resources/rust
   - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/3. Resources/linux
   - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/3. Resources/node
-  # - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/4. Archives/project
+  - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/4. Archives/project
   # - /Users/tyler/Library/Mobile Documents/iCloud~md~obsidian/Documents/docuvault/4. Archives/blog/test
 
 base:
@@ -25,4 +25,3 @@ resource:
     ./template/src/element.html
   layout: 
     ./template/src/layout.html  
-  

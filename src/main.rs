@@ -44,7 +44,7 @@ lazy_static! {
     };
 }
 
-#[tokio::main(flavor="multi_thread", worker_threads=8)]
+#[tokio::main(flavor="multi_thread", worker_threads=16)]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
     let start_time = Instant::now();
 

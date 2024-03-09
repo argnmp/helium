@@ -1,4 +1,3 @@
-
 import json
 from kiwipiepy import Kiwi
 from kiwipiepy.utils import Stopwords
