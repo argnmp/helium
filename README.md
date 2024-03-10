@@ -4,7 +4,19 @@ Fast static site generator, using nlp for effective searching.
 ## Documentation
 ### Dependencies
 - python
-- kiwipiepy installed through pip
+    - kiwipiepy installed through pip
+- node.js
+
+#### install npm packages
+```shell
+cd template
+npm install
+```
+
+#### install python package
+```
+pip3 install kiwipiepy
+```
 
 To check whether the dependencies have been installed properly, the command below must be executed without problem in the root directory of this project.
 ```
