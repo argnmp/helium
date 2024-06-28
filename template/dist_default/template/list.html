@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% block listblock%}
+                    <div class="md:pl-5">
+                        {% for element in list%}
+                        <a class="anc" href="{{element.link}}">
+                            {% for cover_image in element.cover_images%}
+                            <div class="h-40 bg-center bg-cover bg-gray-100 dark:bg-gray-700" style="background-image: url({{cover_image}})">
+                            </div>
+                            {% break %}
+                            {% endfor %}
+                            <div class="relative group mb-2 py-3 px-5 border-customlight-700 dark:border-customdark-400 bg-gray-100 dark:bg-gray-700 md:hover:bg-customlight-700 md:dark:hover:bg-customdark-400 text-gray-700 md:hover:text-gray-200 dark:text-gray-200 md:dark:hover:text-gray-900">
+                                {% if element.is_pinned %}
+                                <div class="absolute right-1 top-1 inline-block">
+                                    <svg class="" width="24px" height="24px" viewBox="0 0 24 24" stroke-width="1" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg" color="#000000">
+                                        <path class="stroke-customlight-700 dark:stroke-customdark-400 md:group-hover:stroke-gray-200 md:dark:group-hover:stroke-gray-900" d="M9.5 14.5L3 21" stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                                        </path>
+                                        <path
+                                            class="stroke-customlight-700 dark:stroke-customdark-400 md:group-hover:stroke-gray-200 md:dark:group-hover:stroke-gray-900"
+                                            d="M5.00007 9.48528L14.1925 18.6777L15.8895 16.9806L15.4974 13.1944L21.0065 8.5211L15.1568 2.67141L10.4834 8.18034L6.69713 7.78823L5.00007 9.48528Z"
+                                            stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                </div>
+                                {% endif %}
+                                <p class="text-xl font-semibold">
+                                {{element.title}}
+                                </p>
+                                {% if element.child_node > 0 %}
+                                <p class="text-xs">
+                                {{element.child_node}} child nodes
+                                </p>
+                                {% else %}
+                                <div class="pb-1 italic">
+                                <p class="text-xs inline-block underline decoration-solid">
+                                {{element.created_at}}
+                                </p>
+                                <p class="text-xs inline-block underline decoration-solid">
+                                {{element.author}}
+                                </p>
+                                </div>
+                                <p class="text-xs break-words">
+                                {{element.summary}}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% endfor %}
+                        <div class="my-3">
+                            <div class="flex mx-auto w-min bg-gray-100 dark:bg-gray-700 text-sm">
+                                {% if prop.paged == true%}
+                                <a class="anc inline w-8 h-8 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900" href="{{prop.bottom_href}}">
+                                    <div class="w-8 h-8 p-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" /></svg>
+                                    </div>
+                                </a>
+                                {% endif %}
+                                {% for page in pages%}
+                                    {% if page.cursor == true %}
+                                    <a class="anc inline w-8 h-8 bg-customlight-700 dark:bg-customdark-400 text-gray-200 dark:text-gray-900" href="{{page.href}}">
+                                        <p class="leading-8 text-center cursor-pointer">{{page.index}}</p>
+                                    </a>
+                                    {% else %}
+                                    <a class="anc inline w-8 h-8 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900" href="{{page.href}}">
+                                        <p class="leading-8 text-center cursor-pointer">{{page.index}}</p>
+                                    </a>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if prop.paged == true%}
+                                <a class="anc inline w-8 h-8 hover:bg-customlight-700 dark:hover:bg-customdark-400 text-gray-700 hover:text-gray-200 dark:text-gray-200 dark:hover:text-gray-900" href="{{prop.top_href}}">
+                                    <div class="w-8 h-8 p-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M13 18l6 -6" /><path d="M13 6l6 6" /></svg>
+                                    </div>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+{% endblock listblock%}

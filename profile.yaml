@@ -1,0 +1,9 @@
+page_title: blog.argnmp
+name: argnmp
+image: /static/profile image.png
+descriptions:
+  - 컴퓨터공학 관련 주제를 주로 다룹니다.
+  - argnmp@gmail.com
+links:
+  - [github, https://github.com/argnmp]
+footer: © 2023. Taehyeon Kim All rights reserved.

@@ -1,0 +1,24 @@
+nodes:
+  # - /Users/tyler/workspace/vault_cloned/main/2. Areas/blog
+  # - /Users/tyler/workspace/vault_cloned/main/2. Areas/test
+
+  - /Users/tyler/workspace/vault/main/2. Areas/blog-static/About.md
+  - /Users/tyler/workspace/vault/main/2. Areas/blog-static/TØP 의 새 앨범 발매!.md
+  - /Users/tyler/workspace/vault/main/2. Areas/blog-static/TWENTYONEPILOTS.svg
+  - /Users/tyler/workspace/vault/main/2. Areas/blog-static/not todo list.md
+  - /Users/tyler/workspace/vault/main/2. Areas/blog
+  - /Users/tyler/workspace/vault/main/2. Areas/ps
+  - /Users/tyler/workspace/vault/main/2. Areas/project
+
+target_base: /Users/tyler/workspace/projects/argnmp.github.io
+
+open_file_limit: 256
+
+render:
+  template: ./template/dist/template/*.html
+  profile: ./profile.yaml
+  static:
+    - ./wasm/dist/static/
+    - ./template/dist/static/
+    - /Users/tyler/workspace/vault/main/2. Areas/blog-static/profile image.png
+  list_size: 10

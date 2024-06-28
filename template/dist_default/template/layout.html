@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{{profile.page_title}}</title>
+        {% if refresh %}
+        <meta http-equiv="refresh" content="0; url={{refresh}}">
+        {% endif %}
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="/static/main.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+        <script src="/static/entry_bundle.js"></script>
+        <script src="/static/module_bundle.js" type="module"></script>
+    </head>
+    <body class="dark:bg-gray-800">
+        <div class="p-5 md:container md:mx-auto lg:px-20 py-5 xl:px-48 box-border h-screen w-screen">
+            <div class="flex text-customlight-700 dark:text-customdark-400 pb-2 mb-4 border-b-4 border-customlight-700 dark:border-customdark-400">
+                <div class="grow">
+                    <a class="inline-block" href="/">
+                        <p
+                            class="text-3xl font-bold hover:bg-customlight-700 hover:text-white dark:hover:bg-customdark-400 dark:hover:text-gray-800">
+                        {{profile.page_title}}</p>
+                    </a>
+                </div>
+                <button id="searchToggle" class="cursor-pointer justify-center items-center p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-gray-600 dark:stroke-gray-400"
+                        viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                        <path d="M21 21l-6 -6" />
+                    </svg>
+                </button>
+                <button id="toggle" class="cursor-pointer justify-center items-center p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="dark:hidden w-4 h-4" viewBox="0 0 16 16">
+                        <path class="fill-gray-600" d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="hidden dark:block w-4 h-4" viewBox="0 0 16 16">
+                        <path class="fill-gray-400" d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+                        <path class="fill-gray-400" d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732L13.863.1z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
+                <div class="md:col-span-3">
+                    <div class="flex md:flex-col text-gray-900 dark:text-gray-200">
+                        <div class="w-full md:object-center basis-1/4">
+                          <img class="w-full max-w-sm mx-auto rounded-md ring-customlight-600 dark:ring-customdark-500" src="{{profile.image}}" />
+                        </div>
+                        <div class="grow pl-4 md:p-0 md:text-center my-auto">
+                          <p class="text-2xl md:mt-3 mb-2 font-bold">{{profile.name}}</p>
+                          {% for desc in profile.descriptions %}
+                          <p class="text-xs">{{desc}}</p>
+                          {% endfor %}
+                          
+                          {% for link in profile.links %}
+                          <p class="text-xs"><a class="text-xs" href="{{link[1]}}">{{link[0]}}</a></p>
+                          {% endfor %}
+                        </div>
+                    </div>
+                    <div id="toc" class="sticky top-5 mt-5 border-l-2">
+                        <p class="pl-4 pb-1 text-sm text-gray-900 dark:text-gray-200 cursor-pointer hover:text-custom-light-700 dark:hover:text-custom-light-400 hover:font-bold hover:underline" hidden>to load styles for dynamically created elements</ul>
+                    </div>
+                </div>
+                <div id="main" class="grid-flow-row md:col-span-9 rounded-lg">
+                    <div id="searchModule" class="md:pl-5" hidden>
+                        <div class="py-2">
+                            <form class="flex">
+                                <input type="text" name="search" id="search_input" class="inline w-full rounded-md border-0 py-1 px-2 mr-2 text-gray-900 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-customlight-600 dark:focus:ring-customdark-300 sm:text-sm sm:leading-6 dark:bg-gray-800 dark:text-gray-200" placeholder="search for child nodes..." onkeyup="window.search()">
+                                <input type="submit" name="submit" id="submit" class="inline bg-customlight-700 hover:bg-white hover:text-customlight-700 border border-customlight-700 dark:border-customdark-400 text-gray-200 dark:bg-customdark-400 dark:text-gray-900 hover:dark:bg-gray-800 hover:dark:text-gray-200 rounded-md px-2 text-sm cursor-pointer" onclick="window.search()" value="search">
+                            </form>
+                        </div>
+                        <div class="" id="search_result">
+                            <a class="" href="">
+                                <div class="mb-1 px-2 py-1 border border-gray-200 dark:border-gray-600 dark:text-gray-200 hidden">
+                                </div> 
+                            </a>
+                        </div> 
+                    </div>
+                    {% block listblock %}{% endblock listblock %}
+                    {% block postblock %}{% endblock postblock %}
+                </div>
+            </div> 
+            <footer class="py-4 text-sm text-gray-700 dark:text-gray-200 text-center">
+                {{profile.footer}} 
+            </footer>
+        </div>
+    </body>
+</html>
