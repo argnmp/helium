@@ -14,7 +14,7 @@
         <script src="/static/module_bundle.js" type="module"></script>
     </head>
     <body class="dark:bg-gray-800">
-        <div class="p-5 md:container md:mx-auto lg:px-20 py-5 xl:px-48 box-border h-screen w-screen">
+        <div class="p-5 sm:px-10 md:px-16 lg:container mx-auto lg:px-20 py-5 xl:px-48 box-border h-screen w-screen">
             <div class="flex text-customlight-700 dark:text-customdark-400 pb-2 mb-4 border-b-4 border-customlight-700 dark:border-customdark-400">
                 <div class="grow">
                     <a class="inline-block" href="/">
@@ -48,7 +48,7 @@
                         <div class="w-full md:object-center basis-1/4">
                           <img class="w-full max-w-sm mx-auto rounded-md ring-customlight-600 dark:ring-customdark-500" src="{{profile.image}}" />
                         </div>
-                        <div class="grow pl-4 md:p-0 md:text-center my-auto">
+                        <div class="grow pl-4 md:p-0 md:text-left my-auto">
                           <p class="text-2xl md:mt-3 mb-2 font-bold">{{profile.name}}</p>
                           {% for desc in profile.descriptions %}
                           <p class="text-xs">{{desc}}</p>
@@ -64,10 +64,10 @@
                     </div>
                 </div>
                 <div id="main" class="grid-flow-row md:col-span-9 rounded-lg">
-                    <div id="searchModule" class="md:pl-5" hidden>
-                        <div class="py-2">
+                    <div id="searchModule" class="md:pl-3" hidden>
+                        <div class="pb-2">
                             <form class="flex">
-                                <input type="text" name="search" id="search_input" class="inline w-full rounded-md border-0 py-1 px-2 mr-2 text-gray-900 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-customlight-600 dark:focus:ring-customdark-300 sm:text-sm sm:leading-6 dark:bg-gray-800 dark:text-gray-200" placeholder="search for child nodes..." onkeyup="window.search()">
+                                <input type="text" name="search" id="search_input" class="inline w-full rounded-md border-0 py-1 px-2 mr-2 text-gray-900 ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-customlight-600 dark:focus:ring-customdark-300 text-sm sm:leading-6 dark:bg-gray-800 dark:text-gray-200" placeholder="search for child nodes..." onkeyup="window.search()">
                                 <input type="submit" name="submit" id="submit" class="inline bg-customlight-700 hover:bg-white hover:text-customlight-700 border border-customlight-700 dark:border-customdark-400 text-gray-200 dark:bg-customdark-400 dark:text-gray-900 hover:dark:bg-gray-800 hover:dark:text-gray-200 rounded-md px-2 text-sm cursor-pointer" onclick="window.search()" value="search">
                             </form>
                         </div>
