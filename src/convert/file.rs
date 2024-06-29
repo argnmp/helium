@@ -81,7 +81,7 @@ impl Document {
          * parse document property
          */
         let (mut property, raw) = parse_property(&data).await?;
-        let title: String = resolve_osstr(path.file_name())?.into();
+        let title: String = resolve_osstr(path.file_stem())?.into();
         property.title = Some(title.clone());
 
         /*

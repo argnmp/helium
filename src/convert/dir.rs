@@ -238,7 +238,7 @@ pub async fn convert_render_list(children: &Vec<Arc<Node>>) -> Result<Vec<List>,
             },
             NodeType::File(lk) => {
                 match &*lk.read().await {
-                    Some(FileType::Markdown(fp, doc)) => {
+                    Some(FileType::Markdown(_, doc)) => {
                         /*
                          * waits for image_lk because convert_html of file node writes to image
                          */
@@ -255,7 +255,7 @@ pub async fn convert_render_list(children: &Vec<Arc<Node>>) -> Result<Vec<List>,
                         };
                         list.push(List {
                             link: resolve_path(&abs_path)?.into(),
-                            title: fp.key.clone(),
+                            title: doc.property.title.clone().unwrap_or("undefined".to_owned()),
                             created_at: doc.property.created_at.clone().unwrap_or("undefined".to_owned()),
                             author: doc.property.author.clone().unwrap_or("undefined".to_owned()),
                             summary,
