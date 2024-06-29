@@ -18,7 +18,11 @@ async function load_searching_module(){
         location = location.slice(0, location.length-1).replace(/[^/]*$/, '');
     }
         
-    await n.load(location + "searchindex");
+    try {
+      await n.load(location + "searchindex");
+    } catch(e) {
+      return; 
+    }
     window.n = n;
     window.search = async function (e) {
         let text = document.getElementById(`search_input`).value;

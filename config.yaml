@@ -14,6 +14,7 @@ open_file_limit: 256
 render:
   template: ./template/dist/template/*.html
   profile: ./profile.yaml
+  collect_documents: true
   static:
     - ./wasm/dist/static/
     - ./template/dist/static/

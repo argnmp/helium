@@ -54,6 +54,7 @@ open_file_limit: 256
 render:
   template: ./template/dist/template/*.html
   profile: ./profile.yaml
+  collect_documents: true
   static:
     - ./wasm/dist/static/
     - ./template/dist/static/
@@ -66,6 +67,7 @@ render:
 - `open_file_limit`, specify the number of open files used concurrently. This value must be bigger than `50`. You can check your os limit by `ulimit` command.
 - `render.template`, specify the path of template files. You don't need to change if you are using the default templates.
 - `render.profile`, specify the path of profile yaml file. You don't need to change if you are using the default value. 
+- `render.collect_documents`, specify whether to place documents(markdown files) in one directory(`/post`).
 - `render.static`, specify the path of static files. These directories or files copied to the `/static` in your static site. You don't need to change `./wasm/dist/static/`, `./template/dist/static/` if you are using the default value. 
 - `list_size`, specify the number of list elements that are shown in one page.
 

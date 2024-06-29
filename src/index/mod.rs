@@ -185,7 +185,7 @@ pub async fn flatten_file_node(root: &Arc<Node>) -> Vec<Arc<Node>> {
     nodes
 }
 
-pub async fn init_remaining_path(root: &Arc<Node>, target_prefix: &Path) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub async fn init_remaining_path(root: &Arc<Node>, target_prefix: &Path, collect_documents: &Option<&Path>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let web_root_prefix = PathBuf::from_str("/")?;
 
@@ -194,6 +194,15 @@ pub async fn init_remaining_path(root: &Arc<Node>, target_prefix: &Path) -> Resu
     
     while let Some((node, mut path)) = queue.pop_front() {
         path.push(resolve_osstr_default(node.path.read().await.rel_path.file_name())?); 
+        if let NodeType::File(lk) = &node.property.node_type {
+            if let Some(FileType::Markdown(_, _)) = &*lk.read().await {
+                if let Some(collect_path) = collect_documents {
+                    // File node has no children. So it's okay to modify path.
+                    path = collect_path.to_path_buf();
+                    path.push(resolve_osstr_default(node.path.read().await.rel_path.file_name())?);
+                }
+            }
+        }
         let mut path_lk = node.path.write().await;
         path_lk.abs_path = Some(web_root_prefix.join(&path));
         path_lk.target_path = Some(target_prefix.join(&path));

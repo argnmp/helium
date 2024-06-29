@@ -21,6 +21,7 @@ pub struct Context {
 pub struct RenderContext {
     pub template: String,
     pub profile: Option<PathBuf>,
+    pub collect_documents: bool,
     pub r#static: Vec<PathBuf>,
     pub list_size: usize,
 }

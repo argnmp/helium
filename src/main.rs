@@ -1,11 +1,11 @@
-use std::{sync::Arc, time::Instant};
+use std::{path::Path, sync::Arc, time::Instant};
 
 use clap::Parser;
 use context::{Args, Context};
 use convert::{render::get_template, search::render_search_index};
 use index::{init_remaining_path, Node};
 use tokio::{fs::create_dir_all, sync::OnceCell, task::JoinHandle};
-use util::fs::{copy_recursive, remove_dir};
+use util::fs::{copy_recursive, remove_dir, write_from_slice};
 
 mod context;
 mod index;
@@ -68,7 +68,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     /*
      * init target_path
      */
-    init_remaining_path(&root, &context.target_base).await.unwrap();
+    let collect_documents = match context.render.collect_documents {
+        true => Some(Path::new("post")),
+        false => None,
+    };
+    init_remaining_path(&root, &context.target_base, &collect_documents).await.unwrap();
     // index::print_tree(root.clone(), 0).await;
     // println!("init target path: {:?}", start_time.elapsed());
 
@@ -112,6 +116,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     for handle in handles {
         handle.await??;
     }
+    if let Some(path) = collect_documents {
+        create_dir_all(context.target_base.join(path)).await?;
+    }
     // println!("create directories: {:?}", start_time.elapsed());
     
 
@@ -137,8 +144,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     /*
      * render search indices
      */
+    let indices = render_search_index(root).await.unwrap();
+    if let Some(path) = collect_documents {
+        /*
+         * export search index to post directory
+         */
+        let binary = bincode::serialize(&indices)?;
+        write_from_slice(&context.target_base.join(path).join("searchindex"), &binary[..]).await?;
+    }
     
-    let _ = render_search_index(root).await.unwrap();
     println!("total elapsed: {:?}", start_time.elapsed());
 
     Ok(())
